@@ -8,6 +8,7 @@ import {
   Platform,
   StyleSheet,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -18,6 +19,7 @@ import { BlurView } from "expo-blur";
 import useAuthStore from "../store/authStore";
 import useCartStore from "../store/cartStore";
 import { COLORS, USER_ROLES } from "../constants";
+import { apiClient } from "../api/client";
 
 // Auth Screens
 import LoginScreen from "../screens/auth/LoginScreen";
@@ -48,6 +50,7 @@ const AdminUnlockScreen = ({ onUnlock, onPasswordUnlock, onLogout }) => {
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+  const { user, token } = useAuthStore();
 
   const handlePasswordUnlock = async () => {
     if (!password.trim()) {
@@ -55,20 +58,52 @@ const AdminUnlockScreen = ({ onUnlock, onPasswordUnlock, onLogout }) => {
       return;
     }
 
+    // PIN must be 4-6 digits
+    if (!/^\d{4,6}$/.test(password)) {
+      setPasswordError("PIN must be 4-6 digits");
+      setPassword("");
+      return;
+    }
+
     setIsVerifying(true);
     setPasswordError("");
 
-    // Verify password (admin PIN is 3112)
-    if (password === "3112") {
-      setPassword("");
-      setShowPassword(false);
-      onPasswordUnlock();
-    } else {
-      setPasswordError("Invalid password");
-      setPassword("");
-    }
+    try {
+      // Call backend to verify admin PIN
+      const response = await apiClient.post(
+        "/auth/verify-admin-pin",
+        { pin: password },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            // Add replay protection headers
+            "x-client-timestamp": Date.now().toString(),
+            "x-client-nonce": Math.random().toString(36).substring(2, 15),
+            "x-request-id": `admin-pin-${Date.now()}`,
+          },
+        }
+      );
 
-    setIsVerifying(false);
+      if (response.data?.success) {
+        setPassword("");
+        setShowPassword(false);
+        onPasswordUnlock();
+      } else {
+        setPasswordError(response.data?.error || "Invalid PIN");
+        setPassword("");
+      }
+    } catch (error) {
+      const errorMessage = error?.response?.data?.error || "Invalid PIN";
+      setPasswordError(errorMessage);
+      setPassword("");
+
+      // Log security event
+      if (error?.response?.status === 429) {
+        setPasswordError("Too many attempts. Try again later.");
+      }
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   if (showPassword) {
@@ -76,18 +111,20 @@ const AdminUnlockScreen = ({ onUnlock, onPasswordUnlock, onLogout }) => {
       <View style={styles.lockContainer}>
         <Text style={styles.lockTitle}>🔐 Admin Authentication</Text>
         <Text style={styles.lockSubtitle}>
-          Enter your admin password to continue
+          Enter your 4-6 digit admin PIN to continue
         </Text>
 
         <View style={styles.passwordBox}>
           <TextInput
             style={styles.passwordInput}
-            placeholder="Enter password"
+            placeholder="Enter PIN"
             placeholderTextColor="#999"
             secureTextEntry={true}
+            keyboardType="number-pad"
+            maxLength="6"
             value={password}
             onChangeText={(text) => {
-              setPassword(text);
+              setPassword(text.replace(/[^0-9]/g, ""));
               setPasswordError("");
             }}
             editable={!isVerifying}
@@ -103,9 +140,11 @@ const AdminUnlockScreen = ({ onUnlock, onPasswordUnlock, onLogout }) => {
           onPress={handlePasswordUnlock}
           disabled={isVerifying}
         >
-          <Text style={styles.unlockButtonText}>
-            {isVerifying ? "Verifying..." : "Unlock"}
-          </Text>
+          {isVerifying ? (
+            <ActivityIndicator color={COLORS.white} />
+          ) : (
+            <Text style={styles.unlockButtonText}>Unlock</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -114,11 +153,93 @@ const AdminUnlockScreen = ({ onUnlock, onPasswordUnlock, onLogout }) => {
             setPassword("");
             setPasswordError("");
           }}
+          disabled={isVerifying}
         >
           <Text style={styles.switchText}>Use Biometrics</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={onLogout} style={{ marginTop: 16 }}>
+        <TouchableOpacity onPress={onLogout} style={{ marginTop: 16 }} disabled={isVerifying}>
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.lockContainer}>
+      <Text style={styles.lockTitle}>🔒 Admin Session Locked</Text>
+      <Text style={styles.lockSubtitle}>Re-authenticate to continue</Text>
+      <TouchableOpacity style={styles.unlockButton} onPress={onUnlock}>
+        <Text style={styles.unlockButtonText}>🔓 Unlock with Biometrics</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.unlockButton, styles.passwordButton]}
+        onPress={() => setShowPassword(true)}
+      >
+        <Text style={styles.passwordButtonText}>🔑 Unlock with PIN</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={onLogout}>
+        <Text style={styles.logoutText}>Logout</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+  if (showPassword) {
+    return (
+      <View style={styles.lockContainer}>
+        <Text style={styles.lockTitle}>🔐 Admin Authentication</Text>
+        <Text style={styles.lockSubtitle}>
+          Enter your 4-6 digit admin PIN to continue
+        </Text>
+
+        <View style={styles.passwordBox}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Enter PIN"
+            placeholderTextColor="#999"
+            secureTextEntry={true}
+            keyboardType="number-pad"
+            maxLength="6"
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text.replace(/[^0-9]/g, ""));
+              setPasswordError("");
+            }}
+            editable={!isVerifying}
+          />
+        </View>
+
+        {passwordError ? (
+          <Text style={styles.errorText}>{passwordError}</Text>
+        ) : null}
+
+        <TouchableOpacity
+          style={[styles.unlockButton, isVerifying && { opacity: 0.6 }]}
+          onPress={handlePasswordUnlock}
+          disabled={isVerifying}
+        >
+          {isVerifying ? (
+            <ActivityIndicator color={COLORS.white} />
+          ) : (
+            <Text style={styles.unlockButtonText}>Unlock</Text>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            setShowPassword(false);
+            setPassword("");
+            setPasswordError("");
+          }}
+          disabled={isVerifying}
+        >
+          <Text style={styles.switchText}>Use Biometrics</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={onLogout} style={{ marginTop: 16 }} disabled={isVerifying}>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </View>

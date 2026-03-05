@@ -6,6 +6,7 @@ const { validate, schemas } = require("../middleware/validate.middleware");
 const {
   redisAuthLimiter,
 } = require("../middleware/redis-rate-limit.middleware");
+const { protectAgainstReplay } = require("../middleware/replay.middleware");
 
 // Public routes
 router.post("/register", validate(schemas.register), authController.register);
@@ -30,6 +31,17 @@ router.put(
   verifyToken,
   validate(schemas.updateProfile),
   authController.updateProfile,
+);
+
+// Admin PIN verification (for session unlock)
+router.post(
+  "/verify-admin-pin",
+  verifyToken,
+  verifyAdmin,
+  redisAuthLimiter,
+  protectAgainstReplay,
+  validate(schemas.verifyAdminPin),
+  authController.verifyAdminPin,
 );
 
 // Admin routes - Get all customers

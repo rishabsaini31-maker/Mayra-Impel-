@@ -8,6 +8,7 @@ const {
   saveRefreshToken,
   findValidRefreshToken,
   revokeRefreshToken,
+  rotateRefreshToken,
   setRefreshCookie,
   clearRefreshCookie,
 } = require("../services/auth.service");
@@ -271,26 +272,31 @@ class AuthController {
         return res.status(401).json({ error: "User is not authorized" });
       }
 
-      await revokeRefreshToken(incomingRefreshToken);
+      try {
+        // Rotate refresh token (invalidate old, issue new with tracking)
+        const newRefreshToken = await rotateRefreshToken({
+          oldRefreshToken: incomingRefreshToken,
+          userId: user.id,
+          ip: req.ip,
+          userAgent: req.get("user-agent"),
+        });
 
-      const newAccessToken = createAccessToken(user);
-      const newRefreshToken = createRefreshToken(user);
+        const newAccessToken = createAccessToken(user);
 
-      await saveRefreshToken({
-        refreshToken: newRefreshToken,
-        userId: user.id,
-        ip: req.ip,
-        userAgent: req.get("user-agent"),
-      });
+        setRefreshCookie(res, newRefreshToken);
 
-      setRefreshCookie(res, newRefreshToken);
-
-      res.status(200).json({
-        message: "Token refreshed successfully",
-        token: newAccessToken,
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
-      });
+        res.status(200).json({
+          message: "Token refreshed successfully",
+          token: newAccessToken,
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
+        });
+      } catch (rotationError) {
+        console.error("Token rotation error:", rotationError);
+        return res.status(401).json({
+          error: rotationError.message || "Token rotation failed",
+        });
+      }
     } catch (error) {
       console.error("Refresh token error:", error);
       res.status(500).json({ error: "Failed to refresh token" });
@@ -701,6 +707,62 @@ class AuthController {
     } catch (error) {
       console.error("Bulk update customers error:", error);
       res.status(500).json({ error: "Failed to bulk update customers" });
+    }
+  }
+
+  // Verify admin PIN (for session unlock)
+  async verifyAdminPin(req, res) {
+    const {
+      authenticateWithAdminPin,
+      logSecurityEvent,
+    } = require("../services/admin-security.service");
+
+    try {
+      const { pin } = req.body;
+
+      if (!req.user || req.user.role !== "admin") {
+        await logSecurityEvent({
+          userId: req.user?.id,
+          eventType: "UNAUTHORIZED_ACCESS",
+          action: "PIN_VERIFY_UNAUTHORIZED",
+          description: "Non-admin attempted PIN verification",
+          status: "failed",
+          ip_address: req.ip,
+          user_agent: req.get("user-agent"),
+        });
+
+        return res.status(403).json({
+          error: "Admin access required",
+          success: false,
+        });
+      }
+
+      // Verify PIN
+      const result = await authenticateWithAdminPin(req.user.id, pin, req);
+
+      res.status(200).json({
+        success: true,
+        message: result.message,
+      });
+    } catch (error) {
+      console.error("Verify admin PIN error:", error);
+
+      const errorMessage = error.message || "PIN verification failed";
+
+      if (
+        errorMessage.includes("too many attempts") ||
+        errorMessage.includes("locked")
+      ) {
+        return res.status(429).json({
+          error: errorMessage,
+          success: false,
+        });
+      }
+
+      res.status(401).json({
+        error: errorMessage,
+        success: false,
+      });
     }
   }
 }

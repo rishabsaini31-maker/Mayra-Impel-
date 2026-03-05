@@ -6,6 +6,7 @@ const ACCESS_TOKEN_EXPIRY = process.env.JWT_ACCESS_EXPIRES_IN || "15m";
 const REFRESH_TOKEN_EXPIRY_DAYS = Number(
   process.env.JWT_REFRESH_EXPIRES_DAYS || 7,
 );
+const MAX_TOKEN_ROTATIONS = Number(process.env.MAX_TOKEN_ROTATIONS || 10);
 
 const createAccessToken = (user) =>
   jwt.sign(
@@ -38,7 +39,14 @@ const getRefreshExpiryDate = () => {
   return expiresAt.toISOString();
 };
 
-const saveRefreshToken = async ({ refreshToken, userId, ip, userAgent }) => {
+const saveRefreshToken = async ({
+  refreshToken,
+  userId,
+  ip,
+  userAgent,
+  parentTokenHash = null,
+  rotationCount = 0,
+}) => {
   const tokenHash = hashToken(refreshToken);
 
   const { error } = await supabase.from("user_refresh_tokens").insert({
@@ -47,6 +55,10 @@ const saveRefreshToken = async ({ refreshToken, userId, ip, userAgent }) => {
     expires_at: getRefreshExpiryDate(),
     created_by_ip: ip || null,
     user_agent: userAgent || null,
+    parent_token_hash: parentTokenHash,
+    rotation_count: rotationCount,
+    rotated_at: rotationCount > 0 ? new Date().toISOString() : null,
+    max_rotations: MAX_TOKEN_ROTATIONS,
   });
 
   if (error) throw error;
@@ -64,12 +76,18 @@ const revokeRefreshToken = async (refreshToken) => {
   if (error) throw error;
 };
 
+/**
+ * Find valid refresh token and check rotation count
+ * Returns null if token is invalid, expired, revoked, or exceeded rotation limit
+ */
 const findValidRefreshToken = async (refreshToken) => {
   const tokenHash = hashToken(refreshToken);
 
   const { data, error } = await supabase
     .from("user_refresh_tokens")
-    .select("id, user_id, expires_at, revoked_at")
+    .select(
+      "id, user_id, expires_at, revoked_at, rotation_count, max_rotations",
+    )
     .eq("token_hash", tokenHash)
     .is("revoked_at", null)
     .single();
@@ -79,7 +97,69 @@ const findValidRefreshToken = async (refreshToken) => {
   const isExpired = new Date(data.expires_at) <= new Date();
   if (isExpired) return null;
 
+  // Check if token rotation limit exceeded
+  if (data.rotation_count >= data.max_rotations) {
+    console.warn(`Token rotation limit exceeded for user ${data.user_id}`);
+    return null;
+  }
+
   return data;
+};
+
+/**
+ * Rotate refresh token - invalidate old token and issue new one
+ * Implements token rotation chain to prevent token reuse
+ */
+const rotateRefreshToken = async ({
+  oldRefreshToken,
+  userId,
+  ip,
+  userAgent,
+}) => {
+  try {
+    const oldTokenHash = hashToken(oldRefreshToken);
+
+    // Get old token record to track rotation chain
+    const { data: oldTokenRecord, error: fetchError } = await supabase
+      .from("user_refresh_tokens")
+      .select("rotation_count, max_rotations")
+      .eq("token_hash", oldTokenHash)
+      .is("revoked_at", null)
+      .single();
+
+    if (fetchError || !oldTokenRecord) {
+      throw new Error("Invalid refresh token");
+    }
+
+    // Check rotation limit
+    if (oldTokenRecord.rotation_count >= oldTokenRecord.max_rotations) {
+      throw new Error("Token rotation limit exceeded. Please login again.");
+    }
+
+    // Invalidate old token
+    await revokeRefreshToken(oldRefreshToken);
+
+    // Create new token with incremented rotation count
+    const user = { id: userId };
+    const newRefreshToken = createRefreshToken(user);
+
+    const newRotationCount = oldTokenRecord.rotation_count + 1;
+
+    // Save new token with rotation tracking
+    await saveRefreshToken({
+      refreshToken: newRefreshToken,
+      userId,
+      ip,
+      userAgent,
+      parentTokenHash: oldTokenHash,
+      rotationCount: newRotationCount,
+    });
+
+    return newRefreshToken;
+  } catch (error) {
+    console.error("Token rotation error:", error);
+    throw error;
+  }
 };
 
 const setRefreshCookie = (res, refreshToken) => {
@@ -107,7 +187,9 @@ module.exports = {
   saveRefreshToken,
   findValidRefreshToken,
   revokeRefreshToken,
+  rotateRefreshToken,
   setRefreshCookie,
   clearRefreshCookie,
   ACCESS_TOKEN_EXPIRY,
+  MAX_TOKEN_ROTATIONS,
 };

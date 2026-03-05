@@ -100,6 +100,15 @@ const schemas = {
   updateOrderStatus: Joi.object({
     status: Joi.string().valid("pending", "approved", "rejected").required(),
   }),
+
+  verifyAdminPin: Joi.object({
+    pin: Joi.string()
+      .pattern(/^\d{4,6}$/)
+      .required()
+      .messages({
+        "string.pattern.base": "PIN must be 4-6 digits",
+      }),
+  }),
 };
 
 module.exports = { validate, schemas };

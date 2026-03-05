@@ -1,6 +1,7 @@
 import axios from "axios";
 import { authStorage } from "../utils/authStorage";
 import useAuthStore from "../store/authStore";
+import { validateCertificatePin } from "../utils/certificatePinning";
 
 const generateNonce = () =>
   `${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`;
@@ -57,9 +58,18 @@ api.interceptors.request.use(
   },
 );
 
-// Response interceptor for error handling
+// Response interceptor for error handling and certificate pinning
 api.interceptors.response.use(
-  (response) => response,
+  async (response) => {
+    try {
+      // Validate certificate pin
+      await validateCertificatePin(response);
+    } catch (pinError) {
+      console.error("Certificate pin validation failed:", pinError);
+      throw pinError;
+    }
+    return response;
+  },
   async (error) => {
     const url = error.config?.url || "unknown";
     const method = error.config?.method?.toUpperCase() || "unknown";
@@ -83,6 +93,10 @@ api.interceptors.response.use(
       console.error(
         `Server error (${status}) on ${method} ${url}:`,
         error.response?.data,
+      );
+    } else if (error.message === "Certificate pin validation failed") {
+      console.error(
+        "SECURITY: Certificate validation failed - potential MITM attack",
       );
     }
 
