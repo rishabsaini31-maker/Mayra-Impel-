@@ -7,7 +7,6 @@ class CategoryController {
       const { data: categories, error } = await supabase
         .from("categories")
         .select("*")
-        .is("deleted_at", null)
         .order("name", { ascending: true });
 
       if (error) throw error;

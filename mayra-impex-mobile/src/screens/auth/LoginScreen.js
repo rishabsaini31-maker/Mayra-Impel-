@@ -12,9 +12,7 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import { authAPI } from "../../api";
 import useAuthStore from "../../store/authStore";
-import TextInput from "../../components/TextInput";
-import Button from "../../components/Button";
-import AppLogo from "../../components/AppLogo";
+import { TextInput, Button, AppLogo } from "../../components/shared";
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from "../../constants";
 
 const LoginScreen = ({ navigation }) => {

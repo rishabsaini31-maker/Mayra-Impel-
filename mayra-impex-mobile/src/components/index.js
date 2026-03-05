@@ -1,13 +1,9 @@
-// Modern UI Components Export
-export { default as Header } from "./Header";
-export { default as ProductCardModern } from "./ProductCardModern";
-export { default as TagItem } from "./TagItem";
-export { default as OrderCard } from "./OrderCard";
-export { default as BottomNavigation } from "./BottomNavigation";
+// Re-export from organized structure for backward compatibility
+// Shared Components
+export * from "./shared";
 
-// Existing components
-export { default as AppLogo } from "./AppLogo";
-export { default as Button } from "./Button";
-export { default as LoadingSpinner } from "./LoadingSpinner";
-export { default as ProductCard } from "./ProductCard";
-export { default as CategoryCard } from "./CategoryCard";
+// Customer Components
+export * from "./customer";
+
+// Admin Components
+export * from "./admin";

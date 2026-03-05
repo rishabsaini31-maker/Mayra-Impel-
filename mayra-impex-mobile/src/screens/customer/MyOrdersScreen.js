@@ -9,8 +9,8 @@ import {
 } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { orderAPI } from "../../api";
-import OrderStatusBadge from "../../components/OrderStatusBadge";
-import LoadingSpinner from "../../components/LoadingSpinner";
+import { OrderStatusBadge } from "../../components/customer";
+import { LoadingSpinner } from "../../components/shared";
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from "../../constants";
 
 const MyOrdersScreen = ({ navigation }) => {

@@ -413,7 +413,6 @@ class AuthController {
         .from("users")
         .select("id, name, email, phone, role, created_at, is_blocked")
         .eq("role", "customer")
-        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -544,25 +543,68 @@ class AuthController {
   // Get customer segments (VIP, Inactive, High spenders, New)
   async getCustomerSegments(req, res) {
     try {
-      const { data: customers, error } = await supabase
+      // Fetch all customers
+      const { data: customers, error: customerError } = await supabase
         .from("users")
-        .select("id, name, email, phone, created_at, orders(id, created_at)")
+        .select("id, name, email, phone, created_at")
         .eq("role", "customer")
         .is("deleted_at", null);
 
-      if (error) throw error;
+      if (customerError) throw customerError;
+
+      if (!customers || customers.length === 0) {
+        return res.status(200).json({
+          message: "Customer segments retrieved",
+          segments: {
+            vip: { count: 0, data: [] },
+            inactive: { count: 0, data: [] },
+            highSpenders: { count: 0, data: [] },
+            new: { count: 0, data: [] },
+          },
+        });
+      }
+
+      // Fetch all orders
+      const { data: allOrders, error: ordersError } = await supabase
+        .from("orders")
+        .select("id, user_id, created_at");
+
+      if (ordersError) {
+        console.warn("Warning fetching orders for segments:", ordersError);
+      }
+
+      // Group orders by customer
+      const ordersByCustomer = {};
+      if (allOrders) {
+        allOrders.forEach((order) => {
+          if (!ordersByCustomer[order.user_id]) {
+            ordersByCustomer[order.user_id] = [];
+          }
+          ordersByCustomer[order.user_id].push(order);
+        });
+      }
 
       const now = new Date();
       const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-      const vipCustomers = customers.filter((c) => c.orders?.length >= 5);
-      const inactiveCustomers = customers.filter((c) => {
-        const lastOrder = c.orders?.[0]?.created_at;
-        return !lastOrder || new Date(lastOrder) < thirtyDaysAgo;
-      });
-      const highSpenders = customers.filter(
-        (c) => c.orders?.length >= 3 && !vipCustomers.includes(c),
+      // Segment customers
+      const vipCustomers = customers.filter(
+        (c) => (ordersByCustomer[c.id]?.length || 0) >= 5,
       );
+
+      const inactiveCustomers = customers.filter((c) => {
+        const customerOrders = ordersByCustomer[c.id] || [];
+        if (customerOrders.length === 0) return true;
+        const lastOrder = customerOrders[customerOrders.length - 1];
+        return new Date(lastOrder.created_at) < thirtyDaysAgo;
+      });
+
+      const highSpenders = customers.filter(
+        (c) =>
+          (ordersByCustomer[c.id]?.length || 0) >= 3 &&
+          !vipCustomers.some((v) => v.id === c.id),
+      );
+
       const newCustomers = customers.filter((c) => {
         const created = new Date(c.created_at);
         return created > thirtyDaysAgo;
@@ -581,7 +623,7 @@ class AuthController {
         },
       });
     } catch (error) {
-      console.error("Get segments error:", error);
+      console.error("Get segments error:", error.message);
       res.status(500).json({ error: "Failed to fetch customer segments" });
     }
   }

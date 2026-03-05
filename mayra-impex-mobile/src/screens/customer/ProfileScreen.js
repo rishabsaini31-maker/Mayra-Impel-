@@ -8,8 +8,7 @@ import {
   Platform,
 } from "react-native";
 import { useMutation } from "@tanstack/react-query";
-import TextInput from "../../components/TextInput";
-import Button from "../../components/Button";
+import { TextInput, Button } from "../../components/shared";
 import { authAPI } from "../../api";
 import useAuthStore from "../../store/authStore";
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from "../../constants";

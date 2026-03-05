@@ -61,11 +61,31 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
+    const url = error.config?.url || "unknown";
+    const method = error.config?.method?.toUpperCase() || "unknown";
+    const status = error.response?.status;
+
+    if (status === 401) {
+      console.warn("Unauthorized (401) - Token expired or invalid:", url);
       // Token expired or invalid
       await authStorage.clearAuth();
       // Navigate to login screen (handle in your navigation logic)
+    } else if (status === 403) {
+      console.warn(
+        "Forbidden (403) - User does not have permission for this endpoint:",
+        method,
+        url,
+      );
+      console.warn(
+        "Make sure the user has admin role in the database for admin endpoints",
+      );
+    } else if (status >= 500) {
+      console.error(
+        `Server error (${status}) on ${method} ${url}:`,
+        error.response?.data,
+      );
     }
+
     return Promise.reject(error);
   },
 );

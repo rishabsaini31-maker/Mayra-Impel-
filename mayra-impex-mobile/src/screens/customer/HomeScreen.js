@@ -10,30 +10,34 @@ import {
   Alert,
   Image,
   Dimensions,
+  Keyboard,
 } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { productAPI, categoryAPI, bannerAPI } from "../../api";
 import useCartStore from "../../store/cartStore";
 import useAuthStore from "../../store/authStore";
-import ProductCard from "../../components/ProductCard";
-import LoadingSpinner from "../../components/LoadingSpinner";
-import SearchBar from "../../components/SearchBar";
-import HeroBanner from "../../components/HeroBanner";
-import CategoryCard from "../../components/CategoryCard";
-import AppLogo from "../../components/AppLogo";
-import CartToast from "../../components/CartToast";
+import {
+  ProductCard,
+  SearchBar,
+  HeroBanner,
+  CategoryCard,
+  CartToast,
+} from "../../components/customer";
+import { LoadingSpinner, AppLogo } from "../../components/shared";
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from "../../constants";
 
-// Icon mapping for categories
+// Icon mapping for categories - using Ionicons
 const CATEGORY_ICONS = {
-  "Birthday Gifts": "🎂",
-  "Valentine's Gifts": "💝",
-  "Anniversary Gifts": "💍",
-  "Corporate Gifts": "💼",
-  "Wedding Gifts": "💐",
-  "Personalized Gifts": "✨",
-  "Luxury Gifts": "👑",
-  "Baby Shower Gifts": "👶",
+  All: "apps-outline",
+  "Birthday Gifts": "cake-outline",
+  "Valentine's Gifts": "heart-outline",
+  "Anniversary Gifts": "gift-outline",
+  "Corporate Gifts": "briefcase-outline",
+  "Wedding Gifts": "flower-outline",
+  "Personalized Gifts": "sparkles-outline",
+  "Luxury Gifts": "diamond-outline",
+  "Baby Shower Gifts": "accessibility-outline",
+  default: "cube-outline",
 };
 
 const HomeBannerCarousel = ({ sliderImages, width }) => {
@@ -112,6 +116,7 @@ const HomeScreen = ({ navigation, route }) => {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const flatListRef = useRef(null);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const addItem = useCartStore((state) => state.addItem);
@@ -125,13 +130,14 @@ const HomeScreen = ({ navigation, route }) => {
   });
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["products", page, selectedCategoryId],
+    queryKey: ["products", page, selectedCategoryId, searchQuery],
     queryFn: () =>
       productAPI.getAll({
         page,
         limit: 20,
         is_active: true,
         ...(selectedCategoryId && { category_id: selectedCategoryId }),
+        ...(searchQuery && { search: searchQuery }),
       }),
   });
 
@@ -167,18 +173,18 @@ const HomeScreen = ({ navigation, route }) => {
   };
 
   const handleSearch = () => {
+    // when the user submits via keyboard, ensure we return to first page,
+    // optionally refetch and scroll list to the top
     if (searchQuery.trim()) {
-      Alert.alert("Search", `Searching for: ${searchQuery}`);
-      // TODO: Implement search functionality
+      setPage(1);
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+      Keyboard.dismiss();
+      // refetch happens automatically since searchQuery is part of queryKey
     }
   };
 
-  const filteredProducts =
-    data?.products?.filter((product) =>
-      searchQuery
-        ? product.name.toLowerCase().includes(searchQuery.toLowerCase())
-        : true,
-    ) || [];
+  // products returned from API (search and filtering handled server-side)
+  const products = data?.products || [];
 
   const renderProduct = ({ item }) => (
     <View style={styles.productItem}>
@@ -192,12 +198,11 @@ const HomeScreen = ({ navigation, route }) => {
 
   const renderCategory = ({ item }) => {
     const isSelected = selectedCategoryId === item.id;
-    const icon = CATEGORY_ICONS[item.name] || "🎁";
+    const icon = CATEGORY_ICONS[item.name] || CATEGORY_ICONS["default"];
 
     return (
       <CategoryCard
-        category={item.name}
-        icon={icon}
+        category={{ ...item, icon }}
         onPress={() => handleCategoryPress(item)}
         isSelected={isSelected}
       />
@@ -267,9 +272,7 @@ const HomeScreen = ({ navigation, route }) => {
               ? categories.find((c) => c.id === selectedCategoryId)?.name
               : "Wholesale Catalog"}
         </Text>
-        <Text style={styles.productCount}>
-          {filteredProducts.length} products
-        </Text>
+        <Text style={styles.productCount}>{products.length} products</Text>
       </View>
     </View>
   );
@@ -296,7 +299,8 @@ const HomeScreen = ({ navigation, route }) => {
 
       {/* Products Grid */}
       <FlatList
-        data={filteredProducts}
+        ref={flatListRef}
+        data={products}
         renderItem={renderProduct}
         keyExtractor={(item) => item.id}
         numColumns={2}

@@ -26,6 +26,7 @@ const activityRoutes = require("./src/routes/activity.routes");
 const notesRoutes = require("./src/routes/notes.routes");
 const inventoryRoutes = require("./src/routes/inventory.routes");
 const bannerRoutes = require("./src/routes/banner.routes");
+const customersRoutes = require("./src/routes/customers.routes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -79,7 +80,13 @@ app.use(
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "x-client-timestamp",
+      "x-client-nonce",
+      "x-request-id",
+    ],
   }),
 );
 
@@ -104,6 +111,7 @@ app.get("/health", (req, res) => {
 
 // API Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/customers", customersRoutes);
 app.use("/api/products", redisAdminWriteLimiter, productRoutes);
 app.use("/api/categories", redisAdminWriteLimiter, categoryRoutes);
 app.use("/api/orders", redisAdminWriteLimiter, orderRoutes);

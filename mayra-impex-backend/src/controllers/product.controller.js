@@ -71,8 +71,6 @@ class ProductController {
         query = query.eq("is_active", is_active === "true");
       }
 
-      query = query.is("deleted_at", null);
-
       if (search) {
         query = query.ilike("name", `%${search}%`);
       }

@@ -45,7 +45,11 @@ export const categoryAPI = {
 export const productAPI = {
   getAll: async (params = {}) => {
     const response = await api.get("/products", { params });
-    return response.data;
+    // Ensure we always return the products array and pagination
+    return {
+      products: response.data.products || [],
+      pagination: response.data.pagination,
+    };
   },
 
   getById: async (id) => {

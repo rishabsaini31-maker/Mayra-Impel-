@@ -13,9 +13,8 @@ import { useQuery } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { productAPI } from "../../api";
 import useCartStore from "../../store/cartStore";
-import Button from "../../components/Button";
-import CartToast from "../../components/CartToast";
-import LoadingSpinner from "../../components/LoadingSpinner";
+import { CartToast } from "../../components/customer";
+import { Button, LoadingSpinner } from "../../components/shared";
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from "../../constants";
 
 const { width } = Dimensions.get("window");

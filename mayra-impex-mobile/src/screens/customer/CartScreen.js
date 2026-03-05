@@ -9,7 +9,7 @@ import {
   Alert,
 } from "react-native";
 import useCartStore from "../../store/cartStore";
-import Button from "../../components/Button";
+import { Button } from "../../components/shared";
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from "../../constants";
 
 const CartScreen = ({ navigation }) => {

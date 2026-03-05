@@ -11,8 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useCartStore from "../../store/cartStore";
 import useAuthStore from "../../store/authStore";
 import { orderAPI } from "../../api";
-import TextInput from "../../components/TextInput";
-import Button from "../../components/Button";
+import { TextInput, Button } from "../../components/shared";
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from "../../constants";
 
 const CheckoutScreen = ({ navigation }) => {
