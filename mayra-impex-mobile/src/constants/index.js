@@ -1,23 +1,29 @@
-// Colors
+// Colors - Modern Premium Palette
 export const COLORS = {
-  // Primary Colors (Navy/Dark Blue Theme)
-  primary: "#1e3a8a",
-  primaryDark: "#1e293b",
-  primaryLight: "#3b82f6",
+  // Primary Colors (Purple/Indigo Theme - Premium & Modern)
+  primary: "#6366f1", // Vibrant indigo
+  primaryDark: "#4338ca", // Deep indigo
+  primaryLight: "#818cf8", // Light indigo
 
   // Secondary Colors
-  secondary: "#64748b",
-  secondaryLight: "#94a3b8",
+  secondary: "#8b5cf6", // Purple
+  secondaryLight: "#a78bfa", // Light purple
 
   // Accent Colors
-  accent: "#f59e0b",
-  accentLight: "#fbbf24",
+  accent: "#f59e0b", // Amber
+  accentLight: "#fbbf24", // Light amber
+  accentDark: "#d97706", // Dark amber
 
   // Status Colors
-  success: "#10b981",
-  error: "#ef4444",
-  warning: "#f59e0b",
-  info: "#3b82f6",
+  success: "#10b981", // Emerald green
+  error: "#ef4444", // Red
+  warning: "#f59e0b", // Amber
+  info: "#3b82f6", // Blue
+
+  // Gradient Colors
+  gradientStart: "#6366f1", // Indigo
+  gradientMiddle: "#8b5cf6", // Purple
+  gradientEnd: "#d946ef", // Fuchsia
 
   // Neutral Colors
   white: "#ffffff",
@@ -25,21 +31,29 @@ export const COLORS = {
   gray: "#6b7280",
   lightGray: "#f3f4f6",
   darkGray: "#374151",
-  lightBlue: "#3b82f6",
+  mediumGray: "#9ca3af",
 
   // Background Colors
   background: "#ffffff",
-  backgroundDark: "#1f2937",
-  cardBackground: "#f9fafb",
+  backgroundDark: "#0f172a", // Navy dark
+  cardBackground: "#ffffff",
+  cardBackgroundAlt: "#f9fafb",
+  overlay: "rgba(15, 23, 42, 0.5)",
 
   // Text Colors
-  text: "#111827",
-  textLight: "#6b7280",
-  textDark: "#030712",
+  text: "#111827", // Almost black
+  textLight: "#6b7280", // Medium gray
+  textDark: "#030712", // Black
+  textWhite: "#ffffff",
 
   // Border Colors
   border: "#e5e7eb",
   borderDark: "#374151",
+  borderLight: "#f3f4f6",
+
+  // Shadow Colors
+  shadow: "rgba(0, 0, 0, 0.1)",
+  shadowDark: "rgba(0, 0, 0, 0.25)",
 };
 
 // Typography
