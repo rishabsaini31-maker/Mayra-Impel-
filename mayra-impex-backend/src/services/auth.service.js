@@ -1,6 +1,6 @@
 const crypto = require("crypto");
-const jwt = require("jsonwebtoken");
 const { supabase } = require("../config/supabase");
+const { signAccessToken, signRefreshToken } = require("../utils/jwt-keyring");
 
 const ACCESS_TOKEN_EXPIRY = process.env.JWT_ACCESS_EXPIRES_IN || "15m";
 const REFRESH_TOKEN_EXPIRY_DAYS = Number(
@@ -9,24 +9,22 @@ const REFRESH_TOKEN_EXPIRY_DAYS = Number(
 const MAX_TOKEN_ROTATIONS = Number(process.env.MAX_TOKEN_ROTATIONS || 10);
 
 const createAccessToken = (user) =>
-  jwt.sign(
+  signAccessToken(
     {
       userId: user.id,
       email: user.email,
       role: user.role,
       tv: Number(user.token_version || 0),
     },
-    process.env.JWT_SECRET,
     { expiresIn: ACCESS_TOKEN_EXPIRY },
   );
 
 const createRefreshToken = (user) =>
-  jwt.sign(
+  signRefreshToken(
     {
       userId: user.id,
       tokenType: "refresh",
     },
-    process.env.JWT_REFRESH_SECRET,
     { expiresIn: `${REFRESH_TOKEN_EXPIRY_DAYS}d` },
   );
 

@@ -112,9 +112,22 @@ NODE_ENV=production
 # Token Configuration
 JWT_SECRET=<strong-random-secret-256+chars>
 JWT_REFRESH_SECRET=<strong-random-secret-256+chars>
+# Recommended key ring format for overlap rotation
+# JWT_ACCESS_KEYS=kidA:secretA,kidB:secretB
+# JWT_ACCESS_ACTIVE_KID=kidB
+# JWT_REFRESH_KEYS=ridA:secretA,ridB:secretB
+# JWT_REFRESH_ACTIVE_KID=ridB
 JWT_ACCESS_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_DAYS=7
 MAX_TOKEN_ROTATIONS=10
+
+# SIEM / Alerting
+SECURITY_SIEM_WEBHOOK_URL=<ingest-url>
+SECURITY_SIEM_WEBHOOK_TOKEN=<optional-token>
+ELK_LOG_INGEST_URL=<elk-ingest-url>
+DATADOG_API_KEY=<datadog-api-key>
+DATADOG_SITE=datadoghq.com
+SENTRY_DSN=<sentry-dsn>
 
 # Rate Limiting
 API_RATE_LIMIT=100
@@ -134,6 +147,73 @@ NONCE_TTL_MS=300000
 # CORS
 CORS_ALLOWED_ORIGINS=https://yourdomain.com,https://admin.yourdomain.com
 ```
+
+## Active Attack Monitoring + Alerts (SIEM)
+
+The backend now forwards security events to configured sinks (webhook/ELK/Datadog/Sentry) from `logSecurityEvent`.
+
+### Events forwarded
+
+- `security_audit_log` events
+- auth failures and lockouts
+- replay detections
+- rate-limit hits
+
+### Built-in alert detectors
+
+- `BRUTE_FORCE_SPIKE`
+- `OTP_ABUSE`
+- `TOKEN_REPLAY_PATTERN`
+- `ADMIN_LOGIN_ANOMALY`
+
+Tune thresholds in `mayra-impex-backend/.env`:
+
+```env
+ALERT_BRUTE_FORCE_THRESHOLD=8
+ALERT_OTP_ABUSE_THRESHOLD=5
+ALERT_REPLAY_THRESHOLD=2
+ALERT_ADMIN_ANOMALY_THRESHOLD=2
+```
+
+Target: alert within minutes using your SIEM notification routing.
+
+## Security CI Gate (must-pass)
+
+Workflow: `.github/workflows/security-gate.yml`
+
+Mandatory checks:
+
+- dependency policy (PR)
+- `npm audit --omit=dev --audit-level=high` for backend + mobile
+- Semgrep SAST scan
+- Gitleaks secret scanning
+
+Block deployment unless all checks pass.
+
+## Secrets + Key Lifecycle Management
+
+### KMS / Vault policy
+
+Store all signing keys and third-party secrets in managed secret storage:
+
+- AWS Secrets Manager / GCP Secret Manager / Azure Key Vault / HashiCorp Vault
+- app runtime reads secrets at boot (never commit in repo)
+
+### JWT overlap rotation strategy
+
+1. Add new key pair to `JWT_ACCESS_KEYS` and `JWT_REFRESH_KEYS`.
+2. Keep old keys in key ring for overlap window (7-14 days).
+3. Set `JWT_ACCESS_ACTIVE_KID` and `JWT_REFRESH_ACTIVE_KID` to new key IDs.
+4. After overlap window, remove old keys.
+
+Rotation cadence: every 60-90 days.
+
+### Backup encryption and recovery drills
+
+1. Enable encrypted DB backups at rest.
+2. Run monthly restore drill into isolated environment.
+3. Measure RTO/RPO and log results.
+4. Rotate backup encryption keys at least every 90 days.
 
 ---
 
@@ -179,9 +259,16 @@ Certificate pinning is skipped in development (`NODE_ENV !== "production"`). Tes
 
 ### In Production
 
-1. Configure `certificatePinning.js` with actual certificate fingerprints
-2. Build APK/IPA with production environment
-3. Certificate pinning will automatically validate all API requests
+1. Configure `certificatePinning.js` with actual certificate/public-key fingerprints.
+2. Link a native SSL pinning module for release builds.
+3. Build APK/IPA with production environment only (no dev client).
+4. App startup fails closed in production if pinning config is invalid.
+
+### Root/Jailbreak Protection
+
+- Integrate JailMonkey (or equivalent native module) in release builds.
+- Sensitive API actions are blocked if device integrity checks fail.
+- Do not allow production release with missing integrity module.
 
 ### Certificate Rotation
 
@@ -264,3 +351,6 @@ done
 - [ ] Database backups automated
 - [ ] SSL certificate auto-renewal configured
 - [ ] Monitoring alerts set up for suspicious activities
+- [ ] Security gate workflow required before deploy
+- [ ] Key rotation runbook tested in staging
+- [ ] Monthly backup restore drill scheduled

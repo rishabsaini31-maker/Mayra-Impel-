@@ -1,5 +1,5 @@
-const jwt = require("jsonwebtoken");
 const { supabase } = require("../config/supabase");
+const { verifyAccessToken } = require("../utils/jwt-keyring");
 
 const extractBearerToken = (req) => {
   const authHeader = req.headers.authorization;
@@ -18,7 +18,7 @@ const verifyToken = (req, res, next) => {
       return res.status(401).json({ error: "No token provided" });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = verifyAccessToken(token);
     req.user = decoded; // { userId, email, role }
     next();
   } catch (error) {

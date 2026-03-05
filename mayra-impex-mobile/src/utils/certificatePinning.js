@@ -8,7 +8,7 @@
  * 3. Validate server responses against this public key
  */
 
-import { Platform } from "react-native";
+import { NativeModules, Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 
 // Certificate pinning configuration
@@ -37,6 +37,44 @@ const CERT_PIN_CONFIG = {
   enabled: process.env.NODE_ENV === "production",
 };
 
+const nativePinningModule =
+  NativeModules?.RNSslPublicKeyPinning ||
+  NativeModules?.SslPublicKeyPinning ||
+  null;
+
+const resolveUrl = (rawUrl, fallbackBase) => {
+  try {
+    return new URL(rawUrl, fallbackBase);
+  } catch {
+    return null;
+  }
+};
+
+const hasPlaceholders = () => {
+  return (
+    CERT_PIN_CONFIG.pinnedCertificates.some((cert) =>
+      cert.includes("PLACEHOLDER"),
+    ) ||
+    CERT_PIN_CONFIG.pinnedPublicKeys.some((key) => key.includes("PLACEHOLDER"))
+  );
+};
+
+const assertProductionPinConfig = () => {
+  if (!CERT_PIN_CONFIG.enabled) return;
+
+  if (!CERT_PIN_CONFIG.domain || CERT_PIN_CONFIG.domain === "localhost") {
+    throw new Error(
+      "Certificate pinning requires a production API host. Set EXPO_PUBLIC_API_URL to your live HTTPS API.",
+    );
+  }
+
+  if (hasPlaceholders()) {
+    throw new Error(
+      "Certificate pinning is enabled but placeholder fingerprints are still configured.",
+    );
+  }
+};
+
 /**
  * Validate certificate fingerprint against pinned certificates
  * This is called by axios interceptor for HTTPS responses
@@ -46,12 +84,21 @@ export const validateCertificatePin = async (response) => {
     return true; // Skip in development
   }
 
-  // Note: In a real production app, you would extract the certificate from the response
-  // and validate it against CERT_PIN_CONFIG.pinnedCertificates
-  // This is a simplified version - for full implementation, use rn-fetch-blob or similar
+  assertProductionPinConfig();
 
-  // For now, we validate URL matches expected domain
-  const responseUrl = new URL(response.config.url);
+  const responseUrl = resolveUrl(
+    response?.config?.url,
+    response?.config?.baseURL || process.env.EXPO_PUBLIC_API_URL,
+  );
+
+  if (!responseUrl) {
+    throw new Error("Certificate pin validation failed");
+  }
+
+  if (responseUrl.protocol !== "https:") {
+    throw new Error("Certificate pin validation failed");
+  }
+
   if (responseUrl.hostname !== CERT_PIN_CONFIG.domain) {
     console.error("Certificate pin validation failed: Domain mismatch");
     throw new Error("Certificate pin validation failed");
@@ -84,32 +131,20 @@ export const setupCertificatePinning = async () => {
   }
 
   try {
-    // Validate configuration
-    if (
-      !CERT_PIN_CONFIG.pinnedCertificates.length &&
-      !CERT_PIN_CONFIG.pinnedPublicKeys.length
-    ) {
-      console.warn(
-        "No certificate pins configured. Update CERT_PIN_CONFIG with actual certificate fingerprints.",
+    assertProductionPinConfig();
+
+    if (!nativePinningModule || !nativePinningModule.initialize) {
+      throw new Error(
+        "Native SSL pinning module is not linked. Build with native pinning before production release.",
       );
-      return false;
     }
 
-    // Check if any placeholder values are still present
-    const hasPlaceholders =
-      CERT_PIN_CONFIG.pinnedCertificates.some((cert) =>
-        cert.includes("PLACEHOLDER"),
-      ) &&
-      CERT_PIN_CONFIG.pinnedPublicKeys.some((key) =>
-        key.includes("PLACEHOLDER"),
-      );
-
-    if (hasPlaceholders) {
-      console.error(
-        "Certificate pinning not configured. Replace PLACEHOLDER values with actual certificate/public key fingerprints.",
-      );
-      return false;
-    }
+    await nativePinningModule.initialize({
+      [CERT_PIN_CONFIG.domain]: {
+        includeSubdomains: true,
+        publicKeyHashes: CERT_PIN_CONFIG.pinnedPublicKeys,
+      },
+    });
 
     // Set up a flag in secure storage
     await SecureStore.setItemAsync(
@@ -125,7 +160,7 @@ export const setupCertificatePinning = async () => {
     return true;
   } catch (error) {
     console.error("Error setting up certificate pinning:", error);
-    return false;
+    throw error;
   }
 };
 
@@ -140,7 +175,8 @@ export const getCertificatePinReport = () => {
     platform: Platform.OS,
     certificateCount: CERT_PIN_CONFIG.pinnedCertificates.length,
     publicKeyCount: CERT_PIN_CONFIG.pinnedPublicKeys.length,
-    configured: !CERT_PIN_CONFIG.pinnedCertificates[0].includes("PLACEHOLDER"),
+    configured: !hasPlaceholders(),
+    nativeModuleLinked: Boolean(nativePinningModule),
   };
 };
 

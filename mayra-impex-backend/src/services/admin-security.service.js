@@ -1,6 +1,10 @@
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 const { supabase } = require("../config/supabase");
+const {
+  sendSecurityEventToSinks,
+  evaluateSecurityAlerts,
+} = require("./security-monitoring.service");
 
 /**
  * Admin PIN Security Service
@@ -192,6 +196,20 @@ const logSecurityEvent = async ({
   created_by = "system",
 }) => {
   try {
+    const payload = {
+      user_id: userId,
+      event_type: eventType,
+      action,
+      description,
+      status,
+      ip_address,
+      user_agent,
+      failed_reason,
+      metadata,
+      created_by,
+      timestamp: new Date().toISOString(),
+    };
+
     const { error } = await supabase.from("security_audit_log").insert({
       user_id: userId,
       event_type: eventType,
@@ -209,6 +227,11 @@ const logSecurityEvent = async ({
       console.error("Audit log error:", error);
       // Don't throw - logging failure shouldn't break app
     }
+
+    await Promise.all([
+      sendSecurityEventToSinks(payload),
+      evaluateSecurityAlerts(payload),
+    ]);
   } catch (error) {
     console.error("Security event logging error:", error);
   }

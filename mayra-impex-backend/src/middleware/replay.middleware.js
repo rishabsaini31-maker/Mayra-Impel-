@@ -1,4 +1,5 @@
 const { setNonceIfNotExists } = require("../config/redis");
+const { logSecurityEvent } = require("../services/admin-security.service");
 
 const replayNonceStore = new Map();
 
@@ -52,6 +53,21 @@ const protectAgainstReplay = async (req, res, next) => {
     if (process.env.REDIS_URL) {
       const accepted = await setNonceIfNotExists(key, NONCE_TTL_MS);
       if (!accepted) {
+        await logSecurityEvent({
+          userId: req.user.userId,
+          eventType: "REPLAY_PROTECTION",
+          action: "REPLAY_DETECTED",
+          description: `Replay request blocked on ${req.method} ${req.originalUrl}`,
+          status: "suspicious",
+          ip_address: req.ip,
+          user_agent: req.get("user-agent"),
+          metadata: {
+            nonce,
+            path: req.originalUrl,
+            method: req.method,
+          },
+        });
+
         return res.status(409).json({ error: "Replay request detected" });
       }
 
@@ -59,6 +75,21 @@ const protectAgainstReplay = async (req, res, next) => {
     }
 
     if (replayNonceStore.has(key)) {
+      await logSecurityEvent({
+        userId: req.user.userId,
+        eventType: "REPLAY_PROTECTION",
+        action: "REPLAY_DETECTED",
+        description: `Replay request blocked on ${req.method} ${req.originalUrl}`,
+        status: "suspicious",
+        ip_address: req.ip,
+        user_agent: req.get("user-agent"),
+        metadata: {
+          nonce,
+          path: req.originalUrl,
+          method: req.method,
+        },
+      });
+
       return res.status(409).json({ error: "Replay request detected" });
     }
 

@@ -2,6 +2,7 @@ import axios from "axios";
 import { authStorage } from "../utils/authStorage";
 import useAuthStore from "../store/authStore";
 import { validateCertificatePin } from "../utils/certificatePinning";
+import { assertDeviceSafeForSensitiveAction } from "../utils/deviceSecurity";
 
 const generateNonce = () =>
   `${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`;
@@ -36,6 +37,9 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   async (config) => {
+    const requestUrl = `${config.baseURL || ""}${config.url || ""}`;
+    assertDeviceSafeForSensitiveAction(requestUrl);
+
     try {
       useAuthStore.getState().markActivity();
       const token = await authStorage.getToken();

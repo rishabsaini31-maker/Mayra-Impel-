@@ -38,17 +38,6 @@ const AdminDashboardScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState("customers");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  // Log user info for debugging
-  useEffect(() => {
-    console.log("Admin Dashboard loaded with user:", {
-      id: user?.id,
-      email: user?.email,
-      name: user?.name,
-      role: user?.role,
-      is_admin: user?.role === "admin",
-    });
-  }, []);
-
   // Auto-close sidebar when switching tabs
   useEffect(() => {
     setIsSidebarOpen(false);

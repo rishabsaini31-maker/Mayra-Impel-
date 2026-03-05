@@ -1,4 +1,5 @@
 const { incrementCounterWithTtl } = require("../config/redis");
+const { logSecurityEvent } = require("../services/admin-security.service");
 
 const createRedisRateLimiter = ({
   windowMs,
@@ -33,6 +34,24 @@ const createRedisRateLimiter = ({
       }
 
       if (count > max) {
+        await logSecurityEvent({
+          userId: req.user?.userId || null,
+          eventType: "RATE_LIMIT",
+          action: "RATE_LIMIT_HIT",
+          description: `Rate limit exceeded for ${req.method} ${req.originalUrl}`,
+          status: "failed",
+          ip_address: req.ip,
+          user_agent: req.get("user-agent"),
+          metadata: {
+            key_prefix: keyPrefix,
+            count,
+            max,
+            window_ms: windowMs,
+            path: req.originalUrl,
+            method: req.method,
+          },
+        });
+
         return res.status(429).json({ error: message });
       }
 

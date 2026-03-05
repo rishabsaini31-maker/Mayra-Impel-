@@ -1,7 +1,8 @@
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const { supabase } = require("../config/supabase");
 const emailService = require("../services/email.service");
+const { verifyRefreshToken } = require("../utils/jwt-keyring");
+const { logSecurityEvent } = require("../services/admin-security.service");
 const {
   createAccessToken,
   createRefreshToken,
@@ -135,6 +136,18 @@ class AuthController {
 
       if (!user) {
         await sleep(FAILED_LOGIN_DELAY_MS);
+        await logSecurityEvent({
+          userId: null,
+          eventType: "AUTH_LOGIN",
+          action: "LOGIN_FAILED_UNKNOWN_EMAIL",
+          description: `Login failed for unknown email ${normalizedEmail}`,
+          status: "failed",
+          ip_address: req.ip,
+          user_agent: req.get("user-agent"),
+          failed_reason: "user_not_found",
+          metadata: { email: normalizedEmail },
+        });
+
         console.warn("Failed login attempt", {
           email: normalizedEmail,
           ip: req.ip,
@@ -145,6 +158,18 @@ class AuthController {
 
       if (user.is_blocked) {
         await sleep(FAILED_LOGIN_DELAY_MS);
+        await logSecurityEvent({
+          userId: user.id,
+          eventType: "AUTH_LOGIN",
+          action: "LOGIN_BLOCKED_ACCOUNT",
+          description: "Login blocked because account is blocked",
+          status: "failed",
+          ip_address: req.ip,
+          user_agent: req.get("user-agent"),
+          failed_reason: "account_blocked",
+          metadata: { email: normalizedEmail },
+        });
+
         return res.status(403).json({ error: "Account is blocked" });
       }
 
@@ -154,6 +179,21 @@ class AuthController {
         new Date(user.account_locked_until) > new Date()
       ) {
         await sleep(FAILED_LOGIN_DELAY_MS);
+        await logSecurityEvent({
+          userId: user.id,
+          eventType: "AUTH_LOGIN",
+          action: "LOGIN_FAILED_ACCOUNT_LOCKED",
+          description: "Login failed while account lockout is active",
+          status: "failed",
+          ip_address: req.ip,
+          user_agent: req.get("user-agent"),
+          failed_reason: "account_locked",
+          metadata: {
+            email: normalizedEmail,
+            account_locked_until: user.account_locked_until,
+          },
+        });
+
         return res.status(423).json({
           error: "Account is temporarily locked. Try again later.",
         });
@@ -188,6 +228,23 @@ class AuthController {
           reason: "invalid_password",
         });
 
+        await logSecurityEvent({
+          userId: user.id,
+          eventType: "AUTH_LOGIN",
+          action: "LOGIN_FAILED_INVALID_PASSWORD",
+          description: "Login failed due to invalid password",
+          status: "failed",
+          ip_address: req.ip,
+          user_agent: req.get("user-agent"),
+          failed_reason: "invalid_password",
+          metadata: {
+            email: normalizedEmail,
+            failed_attempts: supportsSecurityColumns
+              ? (user.failed_login_attempts || 0) + 1
+              : null,
+          },
+        });
+
         return res.status(401).json({ error: "Invalid email or password" });
       }
 
@@ -218,6 +275,21 @@ class AuthController {
       delete user.failed_login_attempts;
       delete user.account_locked_until;
 
+      await logSecurityEvent({
+        userId: user.id,
+        eventType: "AUTH_LOGIN",
+        action:
+          user.role === "admin" ? "ADMIN_LOGIN_SUCCESS" : "USER_LOGIN_SUCCESS",
+        description: "User login successful",
+        status: "success",
+        ip_address: req.ip,
+        user_agent: req.get("user-agent"),
+        metadata: {
+          email: user.email,
+          role: user.role,
+        },
+      });
+
       res.status(200).json({
         message: "Login successful",
         user,
@@ -242,11 +314,19 @@ class AuthController {
 
       let decoded;
       try {
-        decoded = jwt.verify(
-          incomingRefreshToken,
-          process.env.JWT_REFRESH_SECRET,
-        );
+        decoded = verifyRefreshToken(incomingRefreshToken);
       } catch (error) {
+        await logSecurityEvent({
+          userId: null,
+          eventType: "AUTH_REFRESH",
+          action: "REFRESH_TOKEN_INVALID",
+          description: "Refresh token verification failed",
+          status: "failed",
+          ip_address: req.ip,
+          user_agent: req.get("user-agent"),
+          failed_reason: error.name || "invalid_token",
+        });
+
         return res.status(401).json({ error: "Invalid refresh token" });
       }
 
@@ -256,6 +336,16 @@ class AuthController {
 
       const tokenRecord = await findValidRefreshToken(incomingRefreshToken);
       if (!tokenRecord) {
+        await logSecurityEvent({
+          userId: decoded.userId,
+          eventType: "REPLAY_PROTECTION",
+          action: "REFRESH_TOKEN_REUSE_OR_REVOKED",
+          description: "Refresh token was revoked, expired, or reused",
+          status: "suspicious",
+          ip_address: req.ip,
+          user_agent: req.get("user-agent"),
+        });
+
         return res
           .status(401)
           .json({ error: "Refresh token expired or revoked" });
