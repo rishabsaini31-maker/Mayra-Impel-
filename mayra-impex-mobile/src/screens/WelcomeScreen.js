@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from "react";
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
   Animated,
-  Dimensions 
+  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS, FONTS, SPACING } from "../constants";
@@ -59,7 +59,7 @@ const WelcomeScreen = ({ navigation }) => {
 
   const rotate = logoRotate.interpolate({
     inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
+    outputRange: ["0deg", "360deg"],
   });
 
   return (
@@ -74,24 +74,18 @@ const WelcomeScreen = ({ navigation }) => {
       <View style={styles.circle2} />
       <View style={styles.circle3} />
 
-      <Animated.View 
+      <Animated.View
         style={[
           styles.content,
           {
             opacity: fadeAnim,
-            transform: [
-              { translateY: slideAnim },
-              { scale: scaleAnim }
-            ],
+            transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
           },
         ]}
       >
         {/* Logo/Brand with animation */}
-        <Animated.View 
-          style={[
-            styles.logoContainer,
-            { transform: [{ rotate }] }
-          ]}
+        <Animated.View
+          style={[styles.logoContainer, { transform: [{ rotate }] }]}
         >
           <LinearGradient
             colors={[COLORS.white, COLORS.accentLight]}
@@ -106,11 +100,11 @@ const WelcomeScreen = ({ navigation }) => {
         {/* Welcome Text */}
         <Text style={styles.title}>Welcome to</Text>
         <Text style={styles.brandName}>MAYRA IMPEX</Text>
-        
+
         {/* Subtitle with badge */}
         <View style={styles.badgeContainer}>
           <LinearGradient
-            colors={['rgba(255,255,255,0.2)', 'rgba(255,255,255,0.1)']}
+            colors={["rgba(255,255,255,0.2)", "rgba(255,255,255,0.1)"]}
             style={styles.badge}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
@@ -148,7 +142,7 @@ const WelcomeScreen = ({ navigation }) => {
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={[COLORS.white, 'rgba(255,255,255,0.9)']}
+            colors={[COLORS.white, "rgba(255,255,255,0.9)"]}
             style={styles.button}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
@@ -173,29 +167,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.xl,
   },
   circle1: {
-    position: 'absolute',
+    position: "absolute",
     width: 300,
     height: 300,
     borderRadius: 150,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     top: -100,
     right: -100,
   },
   circle2: {
-    position: 'absolute',
+    position: "absolute",
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
     bottom: -50,
     left: -50,
   },
   circle3: {
-    position: 'absolute',
+    position: "absolute",
     width: 150,
     height: 150,
     borderRadius: 75,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
     top: height * 0.3,
     left: -30,
   },
@@ -210,8 +204,8 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
@@ -233,9 +227,9 @@ const styles = StyleSheet.create({
     fontSize: 42,
     fontFamily: FONTS.bold,
     color: COLORS.white,
-    fontWeight: '800',
+    fontWeight: "800",
     marginBottom: SPACING.md,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
     letterSpacing: 2,
@@ -248,13 +242,13 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     borderRadius: 25,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   badgeText: {
     color: COLORS.white,
     fontSize: 14,
     fontFamily: FONTS.medium,
-    fontWeight: '600',
+    fontWeight: "600",
     letterSpacing: 0.5,
   },
   description: {
@@ -267,14 +261,14 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   featuresContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
     marginBottom: SPACING.xl,
     paddingHorizontal: SPACING.md,
   },
   featureItem: {
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
   },
   featureIcon: {
@@ -285,20 +279,20 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 12,
     fontFamily: FONTS.medium,
-    textAlign: 'center',
+    textAlign: "center",
     opacity: 0.9,
   },
   buttonWrapper: {
-    width: '100%',
+    width: "100%",
     marginBottom: SPACING.md,
   },
   button: {
     paddingVertical: SPACING.lg,
     paddingHorizontal: SPACING.xl,
     borderRadius: 30,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -309,13 +303,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: FONTS.bold,
     color: COLORS.primary,
-    fontWeight: '700',
+    fontWeight: "700",
     marginRight: SPACING.sm,
   },
   buttonIcon: {
     fontSize: 20,
     color: COLORS.primary,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   hint: {
     fontSize: 13,
@@ -323,67 +317,6 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.regular,
     marginTop: SPACING.md,
     opacity: 0.7,
-  },
-});
-  content: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  logoContainer: {
-    marginBottom: SPACING.xl,
-  },
-  logoText: {
-    fontSize: 80,
-    textAlign: "center",
-  },
-  title: {
-    fontSize: FONTS.sizes.lg,
-    color: COLORS.white,
-    fontWeight: "300",
-    marginBottom: SPACING.sm,
-    letterSpacing: 2,
-  },
-  brandName: {
-    fontSize: FONTS.sizes.xxxl,
-    fontWeight: "bold",
-    color: COLORS.white,
-    marginBottom: SPACING.sm,
-    letterSpacing: 3,
-  },
-  subtitle: {
-    fontSize: FONTS.sizes.md,
-    color: COLORS.lightBlue,
-    fontWeight: "500",
-    marginBottom: SPACING.xl,
-  },
-  description: {
-    fontSize: FONTS.sizes.sm,
-    color: COLORS.white,
-    textAlign: "center",
-    marginBottom: SPACING.xxl,
-    lineHeight: 24,
-    opacity: 0.9,
-  },
-  button: {
-    backgroundColor: COLORS.accent,
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.xl,
-    borderRadius: 12,
-    marginBottom: SPACING.xl,
-    minWidth: 200,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: COLORS.primary,
-    fontSize: FONTS.sizes.md,
-    fontWeight: "bold",
-    letterSpacing: 1,
-  },
-  hint: {
-    color: COLORS.white,
-    fontSize: FONTS.sizes.xs,
-    opacity: 0.7,
-    marginTop: SPACING.md,
   },
 });
 

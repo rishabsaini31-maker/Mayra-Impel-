@@ -1,11 +1,11 @@
 import React, { useRef, useEffect } from "react";
-import { 
-  View, 
-  Text, 
-  Image, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
   StyleSheet,
-  Animated 
+  Animated,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from "../../constants";
@@ -37,9 +37,9 @@ const ProductCard = ({
 
   return (
     <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-      <TouchableOpacity 
-        style={styles.card} 
-        onPress={onPress} 
+      <TouchableOpacity
+        style={styles.card}
+        onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         activeOpacity={0.95}
@@ -54,10 +54,10 @@ const ProductCard = ({
             style={styles.image}
             resizeMode="cover"
           />
-          
+
           {/* Gradient overlay */}
           <LinearGradient
-            colors={['transparent', 'rgba(0,0,0,0.05)']}
+            colors={["transparent", "rgba(0,0,0,0.05)"]}
             style={styles.imageGradient}
           />
 
@@ -66,7 +66,7 @@ const ProductCard = ({
               <Text style={styles.inactiveBadgeText}>⚠️ Unavailable</Text>
             </View>
           )}
-          
+
           {product.is_active !== false && (
             <LinearGradient
               colors={[COLORS.accent, COLORS.accentDark]}
@@ -153,14 +153,14 @@ const styles = StyleSheet.create({
   imageContainer: {
     position: "relative",
     backgroundColor: COLORS.lightGray,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   image: {
     width: "100%",
     height: 180,
   },
   imageGradient: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     right: 0,
     bottom: 0,
@@ -189,8 +189,8 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: COLORS.mediumGray,
     marginBottom: SPACING.sm,
-    fontFamily: 'monospace',
-    fontWeight: '500',
+    fontFamily: "monospace",
+    fontWeight: "500",
   },
   footer: {
     flexDirection: "row",
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: COLORS.success,
     marginTop: 2,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   addButtonWrapper: {
     marginLeft: SPACING.sm,
@@ -294,9 +294,9 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
     shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -307,7 +307,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
-export default ProductCard;
 
 export default ProductCard;
