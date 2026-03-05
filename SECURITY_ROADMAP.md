@@ -1,6 +1,7 @@
 # Security Implementation Roadmap
 
 ## ✅ COMPLETED - Production Ready (Phase 1)
+
 - [x] Bcrypt password hashing (12 salt rounds)
 - [x] Admin PIN moved to database with secure verification API
 - [x] JWT with 15-min access token expiry
@@ -11,7 +12,7 @@
 - [x] Error handling (no debug info in production)
 - [x] Security audit logging table (all events tracked)
 - [x] Certificate pinning framework for mobile
-- [x] CORS whitelist validation (not "*")
+- [x] CORS whitelist validation (not "\*")
 - [x] HTTPS enforcement (HTTP redirect in production)
 - [x] Secure cookie settings (httpOnly, secure, sameSite)
 - [x] Input sanitization (control characters removed)
@@ -23,9 +24,11 @@
 ## 🟠 HIGH PRIORITY (Week 1 - Before Full Production)
 
 ### 8️⃣ Add 2FA/SMS OTP Backup Authentication
+
 **Rationale:** If mobile device is lost or stolen, admin can still regain access
 
 **Implementation Scope (1-2 hours):**
+
 ```
 Backend Changes:
 ✓ Add phone_number field to users table
@@ -47,6 +50,7 @@ Fallback Flow:
 ```
 
 **Risk Mitigation:**
+
 - OTP valid for only 5 minutes
 - Max 3 attempts per OTP
 - Rate limit: 1 OTP request per minute
@@ -58,6 +62,7 @@ Fallback Flow:
 **Rationale:** GDPR compliance - if database is breached, sensitive data remains encrypted
 
 **Implementation Scope (2-3 hours):**
+
 ```
 Sensitive Fields to Encrypt:
 - users.name
@@ -93,6 +98,7 @@ FROM members;
 ```
 
 **Risk Mitigation:**
+
 - Master key stored in Supabase vault
 - Automatic backups include encrypted data (safe)
 - No app code changes needed (transparent)
@@ -104,6 +110,7 @@ FROM members;
 **Rationale:** Legal requirement - "Right to be Forgotten" under GDPR Article 17
 
 **Implementation Scope (1-2 hours):**
+
 ```
 Endpoint: DELETE /api/auth/delete-account
 Requires: Password + Fresh SMS OTP (double confirmation)
@@ -136,6 +143,7 @@ Compliance:
 ```
 
 **Risk Mitigation:**
+
 - Request requires both password AND OTP (prevents accidental deletion)
 - 24-hour grace period (user can cancel)
 - Audit log of deletion request created
@@ -147,6 +155,7 @@ Compliance:
 ### 1️⃣1️⃣ Advanced Security Monitoring
 
 **Implement:**
+
 - Dashboard showing failed login attempts
 - Alert system for suspicious activities
 - IP-based anomaly detection
@@ -158,12 +167,14 @@ Compliance:
 ### 1️⃣2️⃣ Request/Response Logging for Debugging
 
 **Do NOT Log:**
+
 - Passwords
 - Credit card numbers
 - PII in request body
 - Authorization tokens
 
 **DO Log:**
+
 - API endpoint
 - Response status
 - Execution time
@@ -246,18 +257,21 @@ describe('Security', () => {
 ## Timeline Recommendations
 
 ### Week 1 (This Week)
+
 - Implement 2FA/SMS OTP
 - Set up PII field encryption
 - Create GDPR deletion endpoint
 - Deploy to production
 
 ### Week 2
+
 - Set up security monitoring dashboard
 - Test with penetration testing scenarios
 - Review audit logs
 - Document incident response procedures
 
 ### Week 3-4
+
 - User acceptance testing with full security features
 - Train customer support on security procedures
 - Set up automated compliance reporting

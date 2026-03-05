@@ -44,6 +44,58 @@ router.post(
   authController.verifyAdminPin,
 );
 
+// 2FA/OTP Recovery Routes
+router.post(
+  "/request-recovery-otp",
+  verifyToken,
+  redisAuthLimiter,
+  protectAgainstReplay,
+  authController.requestRecoveryOTP,
+);
+
+router.post(
+  "/verify-recovery-otp",
+  verifyToken,
+  redisAuthLimiter,
+  protectAgainstReplay,
+  validate(schemas.verifyRecoveryOTP),
+  authController.verifyRecoveryOTP,
+);
+
+router.post(
+  "/add-phone-number",
+  verifyToken,
+  validate(schemas.addPhoneNumber),
+  authController.addPhoneNumber,
+);
+
+// GDPR Account Deletion Routes
+router.post(
+  "/request-deletion",
+  verifyToken,
+  redisAuthLimiter,
+  protectAgainstReplay,
+  validate(schemas.requestAccountDeletion),
+  authController.requestAccountDeletion,
+);
+
+router.post(
+  "/confirm-deletion",
+  verifyToken,
+  redisAuthLimiter,
+  protectAgainstReplay,
+  validate(schemas.confirmAccountDeletion),
+  authController.confirmAccountDeletion,
+);
+
+router.post(
+  "/cancel-deletion",
+  verifyToken,
+  authController.cancelAccountDeletion,
+);
+
+router.get("/deletion-status", verifyToken, authController.getDeletionStatus);
+
 // Admin routes - Get all customers
 router.get("/customers", verifyAdmin, authController.getAllCustomers);
 

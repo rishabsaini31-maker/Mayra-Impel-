@@ -765,6 +765,314 @@ class AuthController {
       });
     }
   }
+
+  // Request 2FA Recovery OTP
+  async requestRecoveryOTP(req, res) {
+    const {
+      requestRecoveryOTP,
+      isOTPLocked,
+    } = require("../services/otp.service");
+    const { logSecurityEvent } = require("../services/admin-security.service");
+
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Check if user is OTP locked
+      const locked = await isOTPLocked(req.user.id);
+      if (locked) {
+        return res.status(429).json({
+          error: "Too many OTP attempts. Please try again in 15 minutes.",
+        });
+      }
+
+      const result = await requestRecoveryOTP(req.user.id, req);
+
+      res.status(200).json(result);
+    } catch (error) {
+      console.error("Request recovery OTP error:", error);
+      res.status(400).json({ error: error.message || "Failed to send OTP" });
+    }
+  }
+
+  // Verify 2FA Recovery OTP
+  async verifyRecoveryOTP(req, res) {
+    const { verifyRecoveryOTP } = require("../services/otp.service");
+    const {
+      createAccessToken,
+      createRefreshToken,
+      saveRefreshToken: saveRefresh,
+      setRefreshCookie: setRefresh,
+    } = require("../services/auth.service");
+
+    try {
+      const { otp } = req.body;
+
+      if (!req.user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const result = await verifyRecoveryOTP(req.user.id, otp, req);
+
+      if (!result.success) {
+        return res.status(401).json(result);
+      }
+
+      // Issue new tokens
+      const accessToken = createAccessToken(result.user);
+      const refreshToken = createRefreshToken(result.user);
+
+      await saveRefresh({
+        refreshToken,
+        userId: result.user.id,
+        ip: req.ip,
+        userAgent: req.get("user-agent"),
+      });
+
+      setRefresh(res, refreshToken);
+
+      res.status(200).json({
+        success: true,
+        message: "Account recovered via OTP",
+        user: result.user,
+        token: accessToken,
+        accessToken,
+        refreshToken,
+      });
+    } catch (error) {
+      console.error("Verify recovery OTP error:", error);
+      res.status(401).json({
+        error: error.message || "OTP verification failed",
+      });
+    }
+  }
+
+  // Add phone number for 2FA setup
+  async addPhoneNumber(req, res) {
+    const { addPhoneNumber } = require("../services/otp.service");
+
+    try {
+      const { phoneNumber } = req.body;
+
+      if (!req.user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const result = await addPhoneNumber(req.user.id, phoneNumber);
+
+      res.status(200).json(result);
+    } catch (error) {
+      console.error("Add phone number error:", error);
+      res
+        .status(400)
+        .json({ error: error.message || "Failed to add phone number" });
+    }
+  }
+
+  // Request account deletion (GDPR)
+  async requestAccountDeletion(req, res) {
+    const { logSecurityEvent } = require("../services/admin-security.service");
+    const { requestRecoveryOTP } = require("../services/otp.service");
+
+    try {
+      const { password } = req.body;
+
+      if (!req.user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Verify password
+      const { data: user } = await supabase
+        .from("users")
+        .select("password_hash")
+        .eq("id", req.user.id)
+        .single();
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const isPasswordValid = await bcrypt.compare(
+        password,
+        user.password_hash,
+      );
+      if (!isPasswordValid) {
+        await logSecurityEvent({
+          userId: req.user.id,
+          eventType: "GDPR_DELETE",
+          action: "DELETE_REQUEST_FAILED",
+          description: "GDPR deletion request with invalid password",
+          status: "failed",
+          ip_address: req.ip,
+        });
+
+        return res.status(401).json({ error: "Invalid password" });
+      }
+
+      // Send OTP for confirmation
+      try {
+        await requestRecoveryOTP(req.user.id, req);
+      } catch (otpError) {
+        return res.status(400).json({
+          error: "Please configure phone number in account settings first",
+        });
+      }
+
+      await logSecurityEvent({
+        userId: req.user.id,
+        eventType: "GDPR_DELETE",
+        action: "DELETE_REQUEST_OTP_SENT",
+        description: "OTP sent for account deletion confirmation",
+        status: "success",
+        ip_address: req.ip,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "OTP sent for deletion confirmation",
+        expiresIn: 300,
+      });
+    } catch (error) {
+      console.error("Request account deletion error:", error);
+      res.status(500).json({ error: "Failed to process deletion request" });
+    }
+  }
+
+  // Confirm account deletion with OTP
+  async confirmAccountDeletion(req, res) {
+    const { verifyRecoveryOTP } = require("../services/otp.service");
+    const { logSecurityEvent } = require("../services/admin-security.service");
+
+    try {
+      const { otp } = req.body;
+
+      if (!req.user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Verify OTP
+      const otpResult = await verifyRecoveryOTP(req.user.id, otp, req);
+
+      if (!otpResult.success) {
+        return res.status(401).json(otpResult);
+      }
+
+      // Schedule deletion (30-day grace period)
+      const deletionScheduledAt = new Date(
+        Date.now() + 30 * 24 * 60 * 60 * 1000,
+      );
+
+      const { error } = await supabase.from("gdpr_deletion_requests").insert({
+        user_id: req.user.id,
+        deletion_scheduled_at: deletionScheduledAt.toISOString(),
+        status: "pending",
+        ip_address: req.ip,
+      });
+
+      if (error) throw error;
+
+      // Log deletion request
+      await logSecurityEvent({
+        userId: req.user.id,
+        eventType: "GDPR_DELETE",
+        action: "DELETE_REQUEST_CONFIRMED",
+        description: `Account deletion scheduled for ${deletionScheduledAt.toDateString()}`,
+        status: "success",
+        ip_address: req.ip,
+        metadata: {
+          deletion_scheduled: deletionScheduledAt.toISOString(),
+          grace_period_days: 30,
+        },
+      });
+
+      // Clear session
+      clearRefreshCookie(res);
+
+      res.status(200).json({
+        success: true,
+        message:
+          "Account deletion confirmed. Your account will be permanently deleted in 30 days.",
+        scheduledDeletionDate: deletionScheduledAt.toISOString(),
+      });
+    } catch (error) {
+      console.error("Confirm account deletion error:", error);
+      res.status(500).json({ error: "Failed to confirm deletion" });
+    }
+  }
+
+  // Cancel account deletion request (within grace period)
+  async cancelAccountDeletion(req, res) {
+    const { logSecurityEvent } = require("../services/admin-security.service");
+
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const { error } = await supabase
+        .from("gdpr_deletion_requests")
+        .update({ status: "cancelled" })
+        .eq("user_id", req.user.id)
+        .eq("status", "pending");
+
+      if (error) throw error;
+
+      await logSecurityEvent({
+        userId: req.user.id,
+        eventType: "GDPR_DELETE",
+        action: "DELETE_REQUEST_CANCELLED",
+        description: "Account deletion request cancelled",
+        status: "success",
+        ip_address: req.ip,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Account deletion cancelled",
+      });
+    } catch (error) {
+      console.error("Cancel account deletion error:", error);
+      res.status(500).json({ error: "Failed to cancel deletion" });
+    }
+  }
+
+  // Get deletion request status
+  async getDeletionStatus(req, res) {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const { data: deletion } = await supabase
+        .from("gdpr_deletion_requests")
+        .select("*")
+        .eq("user_id", req.user.id)
+        .eq("status", "pending")
+        .single();
+
+      if (!deletion) {
+        return res.status(200).json({
+          hasActiveDeletion: false,
+        });
+      }
+
+      const daysRemaining = Math.ceil(
+        (new Date(deletion.deletion_scheduled_at) - new Date()) /
+          (1000 * 60 * 60 * 24),
+      );
+
+      res.status(200).json({
+        hasActiveDeletion: true,
+        scheduledDate: deletion.deletion_scheduled_at,
+        daysRemaining,
+        requestedAt: deletion.requested_at,
+      });
+    } catch (error) {
+      console.error("Get deletion status error:", error);
+      res.status(500).json({ error: "Failed to get deletion status" });
+    }
+  }
 }
 
 module.exports = new AuthController();

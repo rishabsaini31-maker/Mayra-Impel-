@@ -109,6 +109,38 @@ const schemas = {
         "string.pattern.base": "PIN must be 4-6 digits",
       }),
   }),
+
+  requestRecoveryOTP: Joi.object({
+    // Body is empty - uses authenticated user
+  }),
+
+  verifyRecoveryOTP: Joi.object({
+    otp: Joi.string()
+      .pattern(/^\d{6}$/)
+      .required()
+      .messages({
+        "string.pattern.base": "OTP must be 6 digits",
+      }),
+  }),
+
+  addPhoneNumber: Joi.object({
+    phoneNumber: Joi.string()
+      .pattern(/^\+?[1-9]\d{1,14}$/)
+      .required()
+      .messages({
+        "string.pattern.base": "Invalid phone number format",
+      }),
+  }),
+
+  requestAccountDeletion: Joi.object({
+    password: Joi.string().required(),
+  }),
+
+  confirmAccountDeletion: Joi.object({
+    otp: Joi.string()
+      .pattern(/^\d{6}$/)
+      .required(),
+  }),
 };
 
 module.exports = { validate, schemas };
