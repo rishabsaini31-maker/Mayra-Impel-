@@ -9,7 +9,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#1e3a8a"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.mayraimpex.app"
@@ -27,7 +29,10 @@
     },
     "web": {},
     "extra": {
-      "apiUrl": "http://10.47.11.159:5001/api"
+      "apiUrl": "https://mayra-impel.onrender.com/api",
+      "eas": {
+        "projectId": "3b888783-278b-4503-97ad-b8b8efcd03d1"
+      }
     }
   }
 }

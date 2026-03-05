@@ -1,5 +1,11 @@
 import React, { useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Animated } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, FONTS, SPACING } from "../../constants";
@@ -7,67 +13,69 @@ import { COLORS, FONTS, SPACING } from "../../constants";
 // Enhanced color mapping with gradients
 const getCategoryColor = (categoryName) => {
   const colors = {
-    All: { 
+    All: {
       gradient: ["#6366f1", "#8b5cf6"],
       icon: "#ffffff",
       border: "#a78bfa",
-      shadow: "#6366f1"
+      shadow: "#6366f1",
     },
-    "Birthday Gifts": { 
+    "Birthday Gifts": {
       gradient: ["#f59e0b", "#f97316"],
       icon: "#ffffff",
       border: "#fbbf24",
-      shadow: "#f59e0b"
+      shadow: "#f59e0b",
     },
-    "Valentine's Gifts": { 
+    "Valentine's Gifts": {
       gradient: ["#ec4899", "#f43f5e"],
       icon: "#ffffff",
       border: "#f472b6",
-      shadow: "#ec4899"
+      shadow: "#ec4899",
     },
-    "Anniversary Gifts": { 
+    "Anniversary Gifts": {
       gradient: ["#a855f7", "#c026d3"],
       icon: "#ffffff",
       border: "#c084fc",
-      shadow: "#a855f7"
+      shadow: "#a855f7",
     },
-    "Corporate Gifts": { 
+    "Corporate Gifts": {
       gradient: ["#0ea5e9", "#06b6d4"],
       icon: "#ffffff",
       border: "#38bdf8",
-      shadow: "#0ea5e9"
+      shadow: "#0ea5e9",
     },
-    "Wedding Gifts": { 
+    "Wedding Gifts": {
       gradient: ["#8b5cf6", "#a855f7"],
       icon: "#ffffff",
       border: "#a78bfa",
-      shadow: "#8b5cf6"
+      shadow: "#8b5cf6",
     },
-    "Personalized Gifts": { 
+    "Personalized Gifts": {
       gradient: ["#14b8a6", "#10b981"],
       icon: "#ffffff",
       border: "#5eead4",
-      shadow: "#14b8a6"
+      shadow: "#14b8a6",
     },
-    "Luxury Gifts": { 
+    "Luxury Gifts": {
       gradient: ["#dc2626", "#ef4444"],
       icon: "#ffffff",
       border: "#f87171",
-      shadow: "#dc2626"
+      shadow: "#dc2626",
     },
-    "Baby Shower Gifts": { 
+    "Baby Shower Gifts": {
       gradient: ["#d946ef", "#f0abfc"],
       icon: "#ffffff",
       border: "#f5d0fe",
-      shadow: "#d946ef"
+      shadow: "#d946ef",
     },
   };
-  return colors[categoryName] || {
-    gradient: ["#6b7280", "#4b5563"],
-    icon: "#ffffff",
-    border: "#9ca3af",
-    shadow: "#6b7280"
-  };
+  return (
+    colors[categoryName] || {
+      gradient: ["#6b7280", "#4b5563"],
+      icon: "#ffffff",
+      border: "#9ca3af",
+      shadow: "#6b7280",
+    }
+  );
 };
 
 const CategoryCard = ({ category, onPress, isSelected }) => {
@@ -106,19 +114,19 @@ const CategoryCard = ({ category, onPress, isSelected }) => {
             isSelected && styles.iconContainerSelected,
             {
               shadowColor: color.shadow,
-            }
+            },
           ]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
           {/* Icon with glow effect */}
-          <Ionicons 
-            name={category.icon} 
-            size={isSelected ? 36 : 32} 
+          <Ionicons
+            name={category.icon}
+            size={isSelected ? 36 : 32}
             color={color.icon}
             style={styles.icon}
           />
-          
+
           {/* Selection indicator overlay */}
           {isSelected && (
             <View style={styles.selectedOverlay}>
@@ -126,12 +134,9 @@ const CategoryCard = ({ category, onPress, isSelected }) => {
             </View>
           )}
         </LinearGradient>
-        
-        <Text 
-          style={[
-            styles.name, 
-            isSelected && styles.nameSelected
-          ]} 
+
+        <Text
+          style={[styles.name, isSelected && styles.nameSelected]}
           numberOfLines={2}
         >
           {category.name}
@@ -158,7 +163,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: SPACING.sm,
-    position: 'relative',
+    position: "relative",
     // Enhanced shadow
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -172,20 +177,20 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   icon: {
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowColor: "rgba(0, 0, 0, 0.2)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
   },
   selectedOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 4,
     right: 4,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
     borderRadius: 12,
     width: 24,
     height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   name: {
     fontSize: 13,

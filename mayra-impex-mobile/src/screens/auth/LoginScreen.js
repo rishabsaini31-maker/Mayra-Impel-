@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
+import { Ionicons } from "@expo/vector-icons";
 import { authAPI } from "../../api";
 import useAuthStore from "../../store/authStore";
 import { TextInput, Button, AppLogo } from "../../components/shared";
@@ -162,11 +163,11 @@ const LoginScreen = ({ navigation }) => {
 
           <View style={styles.socialButtons}>
             <TouchableOpacity style={styles.socialButton}>
-              <Text style={styles.socialIcon}>G</Text>
+              <Ionicons name="logo-google" size={20} color="#DB4437" />
               <Text style={styles.socialText}>Google</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.socialButton}>
-              <Text style={styles.socialIcon}>🍎</Text>
+              <Ionicons name="logo-apple" size={22} color="#000000" />
               <Text style={styles.socialText}>Apple</Text>
             </TouchableOpacity>
           </View>

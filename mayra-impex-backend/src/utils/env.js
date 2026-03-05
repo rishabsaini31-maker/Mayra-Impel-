@@ -43,8 +43,12 @@ const validateEnv = () => {
     );
   }
 
+  // Note: Redis is optional - used for rate limiting and caching
+  // If not provided, in-memory store will be used (not recommended for production with multiple instances)
   if (process.env.NODE_ENV === "production" && !process.env.REDIS_URL) {
-    throw new Error("REDIS_URL is required in production");
+    console.warn(
+      "⚠️ REDIS_URL not set - using in-memory store. This is not recommended for production with multiple instances.",
+    );
   }
 
   const missing = requiredEnv.filter((key) => !process.env[key]);
