@@ -32,14 +32,22 @@ const CheckoutScreen = ({ navigation }) => {
 
   const placeOrderMutation = useMutation({
     mutationFn: orderAPI.placeOrder,
-    onSuccess: () => {
-      queryClient.invalidateQueries(["myOrders"]);
-      clearCart();
-      Alert.alert(
-        "Success",
-        "Order placed successfully! You will receive confirmation via email and WhatsApp.",
-        [{ text: "OK", onPress: () => navigation.navigate("CustomerTabs") }],
-      );
+    onSuccess: (data) => {
+      // If order is present, treat as success even if warnings exist
+      if (data?.order) {
+        queryClient.invalidateQueries(["myOrders"]);
+        clearCart();
+        let msg =
+          "Order placed successfully! You will receive confirmation via email and WhatsApp.";
+        if (data.warnings && data.warnings.length > 0) {
+          msg += "\n\nNote: " + data.warnings.join("\n");
+        }
+        Alert.alert("Success", msg, [
+          { text: "OK", onPress: () => navigation.navigate("CustomerTabs") },
+        ]);
+      } else {
+        Alert.alert("Error", "Order could not be placed. Please try again.");
+      }
     },
     onError: (error) => {
       const serverError = error.response?.data;

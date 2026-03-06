@@ -46,6 +46,7 @@ const OrdersTab = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -146,12 +147,15 @@ const OrdersTab = () => {
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDateTime = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-IN", {
+    return date.toLocaleString("en-IN", {
       day: "numeric",
       month: "short",
       year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
@@ -232,15 +236,21 @@ const OrdersTab = () => {
               );
             }, 0) || 0;
 
+          const isExpanded = expandedOrderId === item.id;
+
           return (
-            <View style={[styles.orderCard]}>
+            <TouchableOpacity
+              style={[styles.orderCard]}
+              activeOpacity={0.95}
+              onPress={() => setExpandedOrderId(isExpanded ? null : item.id)}
+            >
               <View style={styles.orderHeader}>
                 <View style={styles.orderInfo}>
                   <Text style={styles.orderId}>
                     Order #{item.id.substring(0, 8)}
                   </Text>
                   <Text style={styles.orderDate}>
-                    {formatDate(item.created_at)}
+                    {formatDateTime(item.created_at)}
                   </Text>
                 </View>
                 <View
@@ -295,7 +305,38 @@ const OrdersTab = () => {
                   </Text>
                 </View>
               </View>
-            </View>
+              {isExpanded && (
+                <View style={styles.itemsList}>
+                  <Text style={[styles.detailLabelBold, { marginBottom: 4 }]}>
+                    Order Items
+                  </Text>
+                  {item.order_items?.map((orderItem, idx) => (
+                    <Text key={idx} style={styles.orderItem}>
+                      • {orderItem.products?.name || "Unknown"} (Qty:{" "}
+                      {orderItem.quantity})
+                      {orderItem.products?.price
+                        ? ` — ₹${orderItem.products.price}`
+                        : ""}
+                    </Text>
+                  ))}
+                  <Text style={[styles.detailLabelBold, { marginTop: 8 }]}>
+                    Delivery Info
+                  </Text>
+                  <Text style={styles.orderItem}>
+                    Name: {item.delivery_name || "—"}
+                  </Text>
+                  <Text style={styles.orderItem}>
+                    Phone: {item.delivery_phone || "—"}
+                  </Text>
+                  <Text style={styles.orderItem}>
+                    Shop: {item.shop_name || "—"}
+                  </Text>
+                  <Text style={styles.orderItem}>
+                    Address: {item.delivery_address || "—"}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
           );
         }}
       />
