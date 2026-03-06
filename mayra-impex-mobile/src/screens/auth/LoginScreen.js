@@ -190,15 +190,7 @@ const LoginScreen = ({ navigation }) => {
           />
         </View>
 
-        {/* Debug info - remove after testing */}
-        <View style={styles.debugBox}>
-          <Text style={styles.debugText}>API: {DEBUG_API_URL}</Text>
-          {debugError && (
-            <Text style={[styles.debugText, { color: "#ff4444" }]}>
-              Error: {debugError}
-            </Text>
-          )}
-        </View>
+        {/* ...existing code... */}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -314,17 +306,7 @@ const styles = StyleSheet.create({
   registerButton: {
     marginTop: SPACING.md,
   },
-  debugBox: {
-    marginTop: SPACING.lg,
-    padding: SPACING.sm,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 8,
-  },
-  debugText: {
-    fontSize: 10,
-    color: "#666",
-    fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
-  },
+  // ...existing code...
 });
 
 export default LoginScreen;
