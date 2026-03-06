@@ -1,23 +1,9 @@
 const nodemailer = require("nodemailer");
 
 // Email transporter configuration
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
 
 // Verify SMTP only when explicitly enabled to avoid startup timeouts on some hosts.
-if (process.env.EMAIL_VERIFY_ON_STARTUP === "true") {
-  transporter.verify((error) => {
-    if (error) {
-      console.error("❌ Email configuration error:", error.message);
-    } else {
-      console.log("✅ Email service is ready");
-    }
-  });
-}
+// Deprecated: Nodemailer config is no longer used. Email is now sent via SendGrid (see sendgrid.service.js).
+// This file is retained for reference only and can be removed after migration is fully validated.
 
-module.exports = transporter;
+module.exports = null; // Exporting null as the transporter is deprecated

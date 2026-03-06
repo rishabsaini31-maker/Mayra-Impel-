@@ -1,4 +1,4 @@
-const transporter = require("../config/email");
+const { sendEmail } = require("./sendgrid.service");
 
 class EmailService {
   async sendCSVExportEmail({ exportType, fileName, csvContent, requestedBy }) {
@@ -10,8 +10,7 @@ class EmailService {
 
       const subject = `${exportType} CSV Export - Mayra Impex`;
 
-      const mailOptions = {
-        from: process.env.EMAIL_USER,
+      await sendEmail({
         to: destinationEmail,
         subject,
         text: `A ${exportType.toLowerCase()} CSV export was generated.${requestedBy?.email ? `\nRequested by: ${requestedBy.email}` : ""}`,
@@ -19,14 +18,13 @@ class EmailService {
           {
             filename: fileName,
             content: csvContent,
-            contentType: "text/csv",
+            type: "text/csv",
+            disposition: "attachment",
           },
         ],
-      };
-
-      const info = await transporter.sendMail(mailOptions);
-      console.log("✅ CSV email sent:", info.messageId);
-      return info;
+      });
+      console.log("✅ CSV email sent");
+      return { success: true };
     } catch (error) {
       console.error("❌ CSV email error:", error);
       throw error;
@@ -42,8 +40,7 @@ class EmailService {
         .map((item) => `- ${item.name} (Qty: ${item.quantity})`)
         .join("\n");
 
-      const mailOptions = {
-        from: process.env.EMAIL_USER,
+      await sendEmail({
         to: destinationEmail,
         subject: `New Order #${orderDetails.orderId} - Mayra Impex`,
         text: `
@@ -143,15 +140,13 @@ Mayra Impex B2B Ordering System
           {
             filename: `order-${orderDetails.orderId}.pdf`,
             path: pdfPath,
-            contentType: "application/pdf",
-            contentDisposition: "attachment",
+            type: "application/pdf",
+            disposition: "attachment",
           },
         ],
-      };
-
-      const info = await transporter.sendMail(mailOptions);
-      console.log("✅ Email sent:", info.messageId);
-      return info;
+      });
+      console.log("✅ Email sent");
+      return { success: true };
     } catch (error) {
       console.error("❌ Email error:", error);
       throw error;
