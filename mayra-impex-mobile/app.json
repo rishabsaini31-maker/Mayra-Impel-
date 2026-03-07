@@ -5,6 +5,12 @@
     "version": "1.0.0",
     "assetBundlePatterns": ["**/*"],
     "web": {},
+    "android": {
+      "package": "com.yourcompany.mayraimpex"
+    },
+    "ios": {
+      "bundleIdentifier": "com.yourcompany.mayraimpex"
+    },
     "extra": {
       "apiUrl": "https://mayra-impel.onrender.com/api",
       "eas": {
