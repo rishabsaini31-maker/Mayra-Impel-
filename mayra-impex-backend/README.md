@@ -10,7 +10,7 @@ Production-ready backend for Mayra Impex B2B Wholesale Ordering System.
 - **Storage:** Supabase Storage
 - **Authentication:** JWT
 
-* **Email:** SendGrid
+* **Email:** Nodemailer (Gmail SMTP)
 
 - **WhatsApp:** Twilio API
 - **PDF Generation:** PDFKit

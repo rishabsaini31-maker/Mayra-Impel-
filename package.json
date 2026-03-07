@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@sendgrid/mail": "^8.1.6",
     "expo": "^55.0.5",
     "expo-updates": "^55.0.12",
     "nodemon": "^3.1.14"

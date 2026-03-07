@@ -40,7 +40,7 @@ class EmailService {
         .map((item) => `- ${item.name} (Qty: ${item.quantity})`)
         .join("\n");
 
-      // Read PDF and encode as base64 for SendGrid
+      // Read PDF and encode as base64 for attachment
       const fs = require("fs");
       const pdfBuffer = fs.readFileSync(pdfPath);
       const pdfBase64 = pdfBuffer.toString("base64");
