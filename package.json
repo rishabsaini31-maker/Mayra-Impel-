@@ -2,6 +2,7 @@
   "dependencies": {
     "expo": "^55.0.5",
     "expo-updates": "^55.0.12",
+    "nodemailer": "^8.0.1",
     "nodemon": "^3.1.14"
   }
 }
