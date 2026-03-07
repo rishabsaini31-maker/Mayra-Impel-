@@ -38,34 +38,9 @@ const safePost = async (url, payload, headers = {}) => {
   }
 };
 
+// Sentry integration skipped for now
 const sendToSentry = async (payload) => {
-  const dsn = process.env.SENTRY_DSN;
-  if (!dsn) return;
-
-  try {
-    // Optional dependency: install @sentry/node to enable native Sentry ingestion.
-    const Sentry = require("@sentry/node");
-    if (!Sentry.getCurrentHub().getClient()) {
-      Sentry.init({ dsn, tracesSampleRate: 0 });
-    }
-
-    Sentry.captureMessage(
-      payload.message || payload.event_type || "security_event",
-      {
-        level: payload.alert ? "warning" : "info",
-        tags: {
-          event_type: payload.event_type,
-          action: payload.action,
-          service: SERVICE_NAME,
-        },
-        extra: payload,
-      },
-    );
-  } catch (error) {
-    console.error(
-      "Sentry is configured but @sentry/node is unavailable. Install it to enable Sentry forwarding.",
-    );
-  }
+  // Sentry integration is disabled
 };
 
 const sendToDatadog = async (payload) => {
