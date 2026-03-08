@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { navigate } from "../../navigation/RootNavigation";
 import {
   View,
   Text,
@@ -163,7 +164,7 @@ const RegisterScreen = ({ navigation }) => {
           <Button
             title="Already have an account? Login"
             variant="outline"
-            onPress={() => navigation.navigate("Login")}
+            onPress={() => navigate("Login")}
             style={styles.loginButton}
           />
         </View>

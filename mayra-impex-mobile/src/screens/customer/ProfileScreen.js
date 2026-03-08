@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { navigate } from "../../navigation/RootNavigation";
 import {
   View,
   Text,
@@ -145,7 +146,7 @@ const ProfileScreen = ({ navigation }) => {
             <Button
               title="Login"
               variant="primary"
-              onPress={() => navigation.navigate("Login")}
+              onPress={() => navigate("Login")}
               style={styles.buttonSpacing}
             />
           </View>

@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
+import { navigationRef } from "./RootNavigation";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -360,6 +361,16 @@ const CustomerStack = () => (
       component={OrderDetailScreen}
       options={{ title: "Order Details" }}
     />
+    <Stack.Screen
+      name="Login"
+      component={LoginScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="Register"
+      component={RegisterScreen}
+      options={{ title: "Create Account" }}
+    />
   </Stack.Navigator>
 );
 
@@ -503,10 +514,7 @@ const AppNavigator = () => {
     return <SplashScreen />;
   }
 
-  // If not authenticated, show Welcome and allow guest access to CustomerStack
-  if (!isAuthenticated) {
-    return <CustomerStack />;
-  }
+  // Always show CustomerStack for all users (except admin)
 
   // Check user role
   if (isAdmin) {
@@ -553,6 +561,7 @@ export default function Navigation() {
       }}
     >
       <NavigationContainer
+        ref={navigationRef}
         onStateChange={() => {
           if (isAuthenticated) markActivity();
         }}
