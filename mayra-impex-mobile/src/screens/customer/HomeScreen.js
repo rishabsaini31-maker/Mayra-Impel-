@@ -39,6 +39,7 @@ const CATEGORY_ICONS = {
   "Baby Shower Gifts": "accessibility-outline",
   default: "cube-outline",
 };
+// Removed stray 'We' or 'Welcome' text from this section.
 
 const HomeBannerCarousel = ({ sliderImages, width }) => {
   const bannerListRef = useRef(null);
@@ -219,13 +220,6 @@ const HomeScreen = ({ navigation, route }) => {
     <View>
       {!isProductsTab && (
         <>
-          {/* Hero Banner */}
-          <HeroBanner
-            title="Wholesale Gift Products in Bulk"
-            subtitle="Premium Gifts for Every Occasion • Bulk Orders Welcome"
-            onPress={() => {}}
-          />
-
           {/* Categories Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Browse by Category</Text>
@@ -332,7 +326,9 @@ const HomeScreen = ({ navigation, route }) => {
         message={toastMessage}
         onViewCart={() => {
           setToastVisible(false);
-          navigation.navigate("Cart");
+          {
+            /* Removed 'Welcome' text */
+          }
         }}
       />
     </View>

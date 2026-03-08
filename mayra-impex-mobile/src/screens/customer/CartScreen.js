@@ -8,7 +8,9 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import useCartStore from "../../store/cartStore";
+import useAuthStore from "../../store/authStore";
 import { Button } from "../../components/shared";
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from "../../constants";
 
@@ -45,9 +47,24 @@ const CartScreen = ({ navigation }) => {
     ]);
   };
 
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const handlePlaceOrder = () => {
     if (items.length === 0) {
       Alert.alert("Error", "Your cart is empty");
+      return;
+    }
+    if (!isAuthenticated) {
+      Alert.alert("Login Required", "You need to log in to place an order.", [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Login",
+          onPress: () =>
+            navigation.navigate("Login", { redirectTo: "Checkout" }),
+        },
+      ]);
       return;
     }
     navigation.navigate("Checkout");
@@ -110,6 +127,11 @@ const CartScreen = ({ navigation }) => {
   if (items.length === 0) {
     return (
       <View style={styles.emptyContainer}>
+        <Image
+          source={require("../../../assets/placeholder.png")}
+          style={styles.emptyImage}
+          resizeMode="contain"
+        />
         <Text style={styles.emptyText}>Your cart is empty</Text>
         <Button
           title="Browse Products"
@@ -119,6 +141,11 @@ const CartScreen = ({ navigation }) => {
       </View>
     );
   }
+
+  // Example shipping calculation (flat rate)
+  const shipping = items.length > 0 ? 99 : 0;
+  const subtotal = getTotalPrice;
+  const total = subtotal + shipping;
 
   return (
     <View style={styles.container}>
@@ -130,12 +157,32 @@ const CartScreen = ({ navigation }) => {
       />
 
       <View style={styles.footer}>
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>Subtotal:</Text>
+          <Text style={styles.summaryValue}>₹{subtotal.toFixed(2)}</Text>
+        </View>
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>Shipping:</Text>
+          <Text style={styles.summaryValue}>₹{shipping.toFixed(2)}</Text>
+        </View>
         <View style={styles.totalContainer}>
           <Text style={styles.totalLabel}>Total:</Text>
-          <Text style={styles.totalPrice}>₹{getTotalPrice.toFixed(2)}</Text>
+          <Text style={styles.totalPrice}>₹{total.toFixed(2)}</Text>
         </View>
-
-        <Button title="Proceed to Checkout" onPress={handlePlaceOrder} />
+        <TouchableOpacity
+          onPress={handlePlaceOrder}
+          activeOpacity={0.85}
+          style={{ marginTop: 8 }}
+        >
+          <LinearGradient
+            colors={[COLORS.primary, COLORS.secondary]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.gradientButton}
+          >
+            <Text style={styles.gradientButtonText}>Proceed to Checkout</Text>
+          </LinearGradient>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -250,6 +297,42 @@ const styles = StyleSheet.create({
   },
   browseButton: {
     minWidth: 200,
+  },
+  emptyImage: {
+    width: 160,
+    height: 160,
+    marginBottom: SPACING.lg,
+    opacity: 0.7,
+  },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  summaryLabel: {
+    fontSize: FONTS.sizes.md,
+    color: COLORS.text,
+  },
+  summaryValue: {
+    fontSize: FONTS.sizes.md,
+    color: COLORS.text,
+    fontWeight: "600",
+  },
+  gradientButton: {
+    borderRadius: RADIUS.lg,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: COLORS.shadowDark,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+  },
+  gradientButtonText: {
+    color: COLORS.white,
+    fontSize: FONTS.sizes.lg,
+    fontWeight: "bold",
   },
 });
 

@@ -503,8 +503,9 @@ const AppNavigator = () => {
     return <SplashScreen />;
   }
 
+  // If not authenticated, show Welcome and allow guest access to CustomerStack
   if (!isAuthenticated) {
-    return <AuthStack />;
+    return <CustomerStack />;
   }
 
   // Check user role

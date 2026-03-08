@@ -6,6 +6,7 @@ import {
   Alert,
   TouchableOpacity,
   Platform,
+  Image,
 } from "react-native";
 import { useMutation } from "@tanstack/react-query";
 import { TextInput, Button } from "../../components/shared";
@@ -15,6 +16,7 @@ import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from "../../constants";
 
 const ProfileScreen = ({ navigation }) => {
   const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const logout = useAuthStore((state) => state.logout);
   const updateUser = useAuthStore((state) => state.updateUser);
 
@@ -88,6 +90,10 @@ const ProfileScreen = ({ navigation }) => {
     navigation.navigate("MyOrders");
   };
 
+  const handleAddresses = () => {
+    navigation.navigate("Addresses");
+  };
+
   const performLogout = async () => {
     try {
       await logout();
@@ -116,83 +122,111 @@ const ProfileScreen = ({ navigation }) => {
     ]);
   };
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.summaryCard}>
-        <View style={styles.profileHeaderRow}>
-          <View style={styles.profileIconWrap}>
-            <Text style={styles.profileIcon}>👤</Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.summaryTitle}>My Profile</Text>
-            <Text style={styles.summarySubtitle}>Account Summary</Text>
+  if (!isAuthenticated) {
+    // Guest view: show login button
+    return (
+      <View style={styles.container}>
+        <View style={styles.summaryCard}>
+          <View style={styles.profileHeaderRow}>
+            <View style={styles.profileIconWrap}>
+              <Text style={styles.profileIcon}>👤</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.summaryTitle}>Welcome, Guest</Text>
+              <Text style={styles.summarySubtitle}>
+                Sign in for full access
+              </Text>
+            </View>
           </View>
         </View>
-        <Text style={styles.summaryText}>Name: {user?.name || "-"}</Text>
-        <Text style={styles.summaryText}>Email: {user?.email || "-"}</Text>
-        <Text style={styles.summaryText}>Role: Customer</Text>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.heading}>
-          {isEditing ? "Edit Profile" : "Account Actions"}
-        </Text>
-
-        {isEditing ? (
-          <>
-            <TextInput
-              label="Full Name"
-              value={name}
-              onChangeText={setName}
-              editable
-              helperText="You can edit your name"
-            />
-
-            <TextInput
-              label="Email"
-              value={email}
-              onChangeText={setEmail}
-              editable
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              helperText="Use a valid email address"
-            />
-
-            <View style={styles.buttonGroup}>
-              <Button
-                title="Update Profile"
-                onPress={handleUpdateProfile}
-                loading={updateProfileMutation.isPending}
-                disabled={updateProfileMutation.isPending}
-                style={styles.buttonSpacing}
-              />
-              <Button
-                title="Cancel"
-                variant="outline"
-                onPress={handleCancelEdit}
-              />
-            </View>
-          </>
-        ) : (
+        <View style={styles.card}>
+          <Text style={styles.heading}>Account</Text>
           <View style={styles.buttonGroup}>
-            <Text style={styles.sectionLabel}>Quick Actions</Text>
             <Button
-              title="Edit Profile"
-              variant="outline"
-              onPress={handleEdit}
+              title="Login"
+              variant="primary"
+              onPress={() => navigation.navigate("Login")}
               style={styles.buttonSpacing}
             />
-            <Button
-              title="My Orders"
-              variant="secondary"
-              onPress={handleMyOrders}
-              style={styles.buttonSpacing}
-            />
-            <Button title="Logout" variant="danger" onPress={handleLogout} />
           </View>
-        )}
+        </View>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Home")}
+          style={styles.backRow}
+        >
+          <Text style={styles.backText}>← Back to Home</Text>
+        </TouchableOpacity>
       </View>
+    );
+  }
+
+  // Authenticated user view (modernized)
+  return (
+    <View style={styles.container}>
+      <View style={styles.profileHeaderModern}>
+        <Image
+          source={require("../../../assets/icon.png")}
+          style={styles.avatar}
+        />
+        <Text style={styles.profileName}>{user?.name || "-"}</Text>
+        <Text style={styles.profileEmail}>{user?.email || "-"}</Text>
+      </View>
+
+      {isEditing ? (
+        <View style={styles.card}>
+          <Text style={styles.heading}>Edit Profile</Text>
+          <TextInput
+            label="Full Name"
+            value={name}
+            onChangeText={setName}
+            editable
+            helperText="You can edit your name"
+          />
+          <TextInput
+            label="Email"
+            value={email}
+            onChangeText={setEmail}
+            editable
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            helperText="Use a valid email address"
+          />
+          <View style={styles.buttonGroup}>
+            <Button
+              title="Update Profile"
+              onPress={handleUpdateProfile}
+              loading={updateProfileMutation.isPending}
+              disabled={updateProfileMutation.isPending}
+              style={styles.buttonSpacing}
+            />
+            <Button
+              title="Cancel"
+              variant="outline"
+              onPress={handleCancelEdit}
+            />
+          </View>
+        </View>
+      ) : (
+        <View style={styles.actionList}>
+          <TouchableOpacity style={styles.actionCard} onPress={handleEdit}>
+            <Text style={styles.actionIcon}>✏️</Text>
+            <Text style={styles.actionText}>Edit Profile</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionCard} onPress={handleMyOrders}>
+            <Text style={styles.actionIcon}>📦</Text>
+            <Text style={styles.actionText}>My Orders</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionCard} onPress={handleAddresses}>
+            <Text style={styles.actionIcon}>🏠</Text>
+            <Text style={styles.actionText}>Addresses</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionCard} onPress={handleLogout}>
+            <Text style={styles.actionIcon}>🚪</Text>
+            <Text style={styles.actionText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <TouchableOpacity
         onPress={() => navigation.navigate("Home")}
@@ -205,6 +239,50 @@ const ProfileScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  profileHeaderModern: {
+    alignItems: "center",
+    marginBottom: SPACING.lg,
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: SPACING.sm,
+    backgroundColor: COLORS.lightGray,
+  },
+  profileName: {
+    fontSize: FONTS.sizes.xl,
+    fontWeight: "700",
+    color: COLORS.text,
+    marginBottom: 2,
+  },
+  profileEmail: {
+    fontSize: FONTS.sizes.md,
+    color: COLORS.textLight,
+    marginBottom: SPACING.md,
+  },
+  actionList: {
+    marginBottom: SPACING.lg,
+  },
+  actionCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.lg,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    marginBottom: SPACING.md,
+    ...SHADOWS.medium,
+  },
+  actionIcon: {
+    fontSize: 22,
+    marginRight: 16,
+  },
+  actionText: {
+    fontSize: FONTS.sizes.lg,
+    color: COLORS.text,
+    fontWeight: "600",
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.background,

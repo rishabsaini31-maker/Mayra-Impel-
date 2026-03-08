@@ -1,0 +1,15 @@
+# Dependabot configuration file
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/mayra-impex-backend/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+    ignore:
+      - dependency-name: "jest"
+        versions: ["*beta*", "*alpha*"]
+      - dependency-name: "supertest"
+        versions: ["*beta*", "*alpha*"]

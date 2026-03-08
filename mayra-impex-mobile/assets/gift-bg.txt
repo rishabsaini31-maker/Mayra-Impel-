@@ -1,0 +1,2 @@
+// Download a royalty-free gift image and place it in the assets folder as 'gift-bg.jpg' or 'gift-bg.png'.
+// This is a placeholder for the actual image. Replace with your own if needed.

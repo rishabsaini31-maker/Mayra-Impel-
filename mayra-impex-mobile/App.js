@@ -21,8 +21,11 @@ const queryClient = new QueryClient({
   },
 });
 
+import AnimatedWelcomeScreen from "./src/screens/AnimatedWelcomeScreen";
+
 export default function App() {
   const [securityError, setSecurityError] = useState(null);
+  const [showWelcome, setShowWelcome] = useState(true);
 
   useEffect(() => {
     const initializeSecurity = async () => {
@@ -50,15 +53,21 @@ export default function App() {
     );
   }
 
+  if (showWelcome) {
+    return (
+      <SafeAreaProvider>
+        <AnimatedWelcomeScreen onFinish={() => setShowWelcome(false)} />
+        <StatusBar style="auto" />
+      </SafeAreaProvider>
+    );
+  }
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         {/* Using Modern UI */}
         <ModernNavigator />
-
         {/* To switch back to old UI, uncomment below and comment ModernNavigator above */}
         {/* <Navigation /> */}
-
         <StatusBar style="auto" />
       </QueryClientProvider>
     </SafeAreaProvider>

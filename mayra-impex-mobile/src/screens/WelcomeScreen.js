@@ -3,7 +3,11 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { COLORS, FONTS, SPACING } from "../constants";
 
 const WelcomeScreen = ({ navigation }) => {
-  const handleGetStarted = () => {
+  const handleContinueAsGuest = () => {
+    navigation.replace("CustomerTabs");
+  };
+
+  const handleLogin = () => {
     navigation.replace("Login");
   };
 
@@ -20,10 +24,20 @@ const WelcomeScreen = ({ navigation }) => {
       </Text>
       <TouchableOpacity
         style={styles.button}
-        onPress={handleGetStarted}
+        onPress={handleContinueAsGuest}
         activeOpacity={0.8}
       >
-        <Text style={styles.buttonText}>Get Started</Text>
+        <Text style={styles.buttonText}>Continue as Guest</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          styles.button,
+          { backgroundColor: COLORS.secondary, marginTop: 12 },
+        ]}
+        onPress={handleLogin}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
     </View>
   );
