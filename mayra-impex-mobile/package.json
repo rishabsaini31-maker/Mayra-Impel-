@@ -20,6 +20,8 @@
     "axios": "^1.6.5",
     "expo": "^54.0.33",
     "expo-blur": "~15.0.8",
+    "expo-file-system": "^55.0.15",
+    "expo-image-manipulator": "^55.0.14",
     "expo-image-picker": "~17.0.10",
     "expo-linear-gradient": "~15.0.8",
     "expo-local-authentication": "~17.0.8",

@@ -23,6 +23,7 @@ import {
   SortOptions,
   ExportButton,
 } from "../../components/admin/AdminFeatures";
+import { compressImage } from "../../utils/imageCompression";
 
 const ProductsTab = ({ activeTab }) => {
   const currentTheme = useThemeStore((state) => state.currentTheme);
@@ -141,18 +142,33 @@ const ProductsTab = ({ activeTab }) => {
 
   const uploadImageToStorage = async (imageAsset) => {
     try {
+      console.log("[ProductsTab] Compressing image before upload...");
+
+      // Compress image to 15-35 KB range using medium sizing (800px width)
+      const compressionResult = await compressImage(imageAsset.uri, "medium");
+      console.log(
+        `[ProductsTab] Compression complete: ${compressionResult.sizeInKB} KB`,
+      );
+
       const formData = new FormData();
-      const extension = imageAsset.uri?.split(".")?.pop() || "jpg";
+      // Use webp extension after compression
       formData.append("image", {
-        uri: imageAsset.uri,
-        name: `product_${Date.now()}_${Math.random().toString(36).substring(7)}.${extension}`,
-        type: imageAsset.mimeType || "image/jpeg",
+        uri: compressionResult.uri,
+        name: `product_${Date.now()}_${Math.random().toString(36).substring(7)}.webp`,
+        type: "image/webp",
       });
 
+      console.log("[ProductsTab] Uploading compressed image...");
       const data = await productAPI.uploadImage(formData);
+      console.log("[ProductsTab] Upload successful:", data?.url);
+
       return data?.url || "";
     } catch (err) {
-      console.error("Upload error:", err);
+      console.error("[ProductsTab] Upload error:", err);
+      Alert.alert(
+        "Compression/Upload Error",
+        err.message || "Failed to process image",
+      );
       return null;
     }
   };

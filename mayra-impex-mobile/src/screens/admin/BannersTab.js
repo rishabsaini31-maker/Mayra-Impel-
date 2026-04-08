@@ -15,6 +15,7 @@ import * as ImagePicker from "expo-image-picker";
 import { bannerAPI } from "../../api";
 import useThemeStore from "../../store/themeStore";
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from "../../constants";
+import { compressImage } from "../../utils/imageCompression";
 
 const BannersTab = () => {
   const currentTheme = useThemeStore((state) => state.currentTheme);
@@ -35,16 +36,31 @@ const BannersTab = () => {
   const banners = bannersData?.banners || [];
 
   const uploadBannerImage = async (imageAsset) => {
-    const formData = new FormData();
-    const extension = imageAsset.uri?.split(".")?.pop() || "jpg";
-    formData.append("image", {
-      uri: imageAsset.uri,
-      name: `banner_${Date.now()}.${extension}`,
-      type: imageAsset.mimeType || "image/jpeg",
-    });
+    try {
+      console.log("[BannersTab] Compressing banner image before upload...");
 
-    const data = await bannerAPI.uploadImage(formData);
-    return data?.url || "";
+      // Compress banner image to 15-35 KB range using medium sizing (800px width)
+      const compressionResult = await compressImage(imageAsset.uri, "medium");
+      console.log(
+        `[BannersTab] Compression complete: ${compressionResult.sizeInKB} KB`,
+      );
+
+      const formData = new FormData();
+      formData.append("image", {
+        uri: compressionResult.uri,
+        name: `banner_${Date.now()}.webp`,
+        type: "image/webp",
+      });
+
+      console.log("[BannersTab] Uploading compressed banner...");
+      const data = await bannerAPI.uploadImage(formData);
+      console.log("[BannersTab] Banner upload successful:", data?.url);
+
+      return data?.url || "";
+    } catch (err) {
+      console.error("[BannersTab] Banner upload error:", err);
+      throw err;
+    }
   };
 
   const handleAddBanner = async () => {
