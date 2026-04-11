@@ -5,6 +5,7 @@
 Your commits ARE on GitHub, but GitHub doesn't know they belong to **your account** because:
 
 **Most Likely Cause:** Email `rishbasiniupw165@gmail.com` is either:
+
 - ❌ Not added to your GitHub account
 - ❌ Added but NOT verified
 - ❌ Not marked as PRIMARY
@@ -14,6 +15,7 @@ Your commits ARE on GitHub, but GitHub doesn't know they belong to **your accoun
 ## ✅ THE 4-STEP FIX (Takes 10 minutes total)
 
 ### **STEP 1: Go to Email Settings** (1 minute)
+
 ```
 Open this exact URL in your browser:
 https://github.com/settings/emails
@@ -22,6 +24,7 @@ Look for: rishbasiniupw165@gmail.com
 ```
 
 ### **STEP 2: If Email is Missing - ADD IT** (3 minutes)
+
 ```
 If you DON'T see rishbasiniupw165@gmail.com:
 
@@ -36,6 +39,7 @@ If you DON'T see rishbasiniupw165@gmail.com:
 ```
 
 ### **STEP 3: If Email is NOT Verified - VERIFY IT** (2 minutes)
+
 ```
 If you see rishbasiniupw165@gmail.com but it shows "Unverified":
 
@@ -47,6 +51,7 @@ If you see rishbasiniupw165@gmail.com but it shows "Unverified":
 ```
 
 ### **STEP 4: Make It PRIMARY** (1 minute)
+
 ```
 Once email shows as "✓ Verified":
 
@@ -71,13 +76,13 @@ After Step 4, check:
 
 ## 📍 EXACT URLS TO USE
 
-| Action | URL |
-|--------|-----|
-| **Email Settings** | https://github.com/settings/emails |
-| **Profile Settings** | https://github.com/settings/profile |
-| **Your Commits** | https://github.com/rishabsaini31-maker/Mayra-Impex-/commits/main |
-| **Your Profile** | https://github.com/rishabsaini31-maker |
-| **Check Commit** | https://github.com/rishabsaini31-maker/Mayra-Impex-/commit/02e6109 |
+| Action               | URL                                                                |
+| -------------------- | ------------------------------------------------------------------ |
+| **Email Settings**   | https://github.com/settings/emails                                 |
+| **Profile Settings** | https://github.com/settings/profile                                |
+| **Your Commits**     | https://github.com/rishabsaini31-maker/Mayra-Impex-/commits/main   |
+| **Your Profile**     | https://github.com/rishabsaini31-maker                             |
+| **Check Commit**     | https://github.com/rishabsaini31-maker/Mayra-Impex-/commit/02e6109 |
 
 ---
 
@@ -97,6 +102,7 @@ If green dots STILL don't appear after 1 hour:
 ## 💬 IF NOTHING WORKS
 
 Contact GitHub support:
+
 ```
 Go to: https://github.com/contact
 Select: "Account and billing"
@@ -112,19 +118,20 @@ Include:
 
 ## ⏱️ TIMELINE
 
-| Time | What Happens |
-|------|--------------|
-| Now | You follow steps 1-4 above |
-| 5 min | Email verified on GitHub |
-| 5-30 min | GitHub recalculates contributions |
-| 30-45 min | Green dots appear (usually) |
-| 24 hours max | Guaranteed to appear |
+| Time         | What Happens                      |
+| ------------ | --------------------------------- |
+| Now          | You follow steps 1-4 above        |
+| 5 min        | Email verified on GitHub          |
+| 5-30 min     | GitHub recalculates contributions |
+| 30-45 min    | Green dots appear (usually)       |
+| 24 hours max | Guaranteed to appear              |
 
 ---
 
 ## ✨ EXPECTED FINAL RESULT
 
 **Before:**
+
 ```
 Your Profile
 ├─ Contributions: 🟩 (none for Apr 9)
@@ -132,6 +139,7 @@ Your Profile
 ```
 
 **After Fix:**
+
 ```
 Your Profile
 ├─ Contributions: 🟩🟩🟩 (green dots on Apr 9)
@@ -154,6 +162,7 @@ Your Profile
 ---
 
 **Current Status:**
+
 - ✅ Your git config is correct
 - ✅ Your commits are pushed to GitHub
 - ⏳ Just need to verify email on GitHub

@@ -4,7 +4,7 @@
 
 ```
 Email:               ✅ rishbasiniupw165@gmail.com
-Email Status:        ✅ Verified & Primary  
+Email Status:        ✅ Verified & Primary
 Git Commits:         ✅ Using correct email
 Commits Pushed:      ✅ 3 commits on Apr 9, 2026
 Repository URL:      ✅ https://github.com/rishabsaini31-maker/Mayra-Impex-
@@ -17,6 +17,7 @@ Repository URL:      ✅ https://github.com/rishabsaini31-maker/Mayra-Impex-
 ## 🔍 CHECKLIST: Verify on GitHub.com RIGHT NOW
 
 ### **Check 1: Repository is PUBLIC**
+
 ```
 Go to: https://github.com/rishabsaini31-maker/Mayra-Impex-
 
@@ -32,6 +33,7 @@ If it says "Private":
 ```
 
 ### **Check 2: Your Account is PUBLIC**
+
 ```
 Go to: https://github.com/rishabsaini31-maker
 
@@ -49,6 +51,7 @@ If profile is private:
 ```
 
 ### **Check 3: Email is Verified & Primary**
+
 ```
 Go to: https://github.com/settings/emails
 
@@ -70,6 +73,7 @@ If NOT primary:
 ```
 
 ### **Check 4: Your Latest Commits are Showing Avatars**
+
 ```
 Go to: https://github.com/rishabsaini31-maker/Mayra-Impex-/commits/main
 
@@ -83,7 +87,7 @@ Should show:
 If you see:
   ❌ "❓" question mark = Email not associated
   ❌ Different username = Email mismatch
-  
+
 If seeing "❓":
 → Go back to Check 3
 → Email might not be verified
@@ -92,6 +96,7 @@ If seeing "❓":
 ```
 
 ### **Check 5: Green Dots on Contribution Calendar**
+
 ```
 Go to: https://github.com/rishabsaini31-maker
 
@@ -101,7 +106,7 @@ Should show: Green dot(s) on Apr 9, 2026
 
 Color intensity means:
   🟩 Dark green = more contributions (1+)
-  🟩 Light green = few contributions  
+  🟩 Light green = few contributions
   ⬜ Gray = no contributions
 
 If you see green dots: ✅ WORKING!
@@ -111,6 +116,7 @@ If still gray: Continue to next step
 ```
 
 ### **Check 6: Contribution Count**
+
 ```
 Go to: https://github.com/rishabsaini31-maker
 
@@ -175,6 +181,7 @@ Your GitHub Profile Page Should Show:
 **Most likely cause:** GitHub's background sync job hasn't run yet
 
 **What to do:**
+
 1. Wait another 30 minutes
 2. Hard refresh: Cmd+Shift+R
 3. If STILL nothing:
@@ -189,12 +196,12 @@ Your GitHub Profile Page Should Show:
 
 Keep these bookmarked:
 
-| Purpose | URL |
-|---------|-----|
-| Check email settings | https://github.com/settings/emails |
-| Check profile | https://github.com/settings/profile |
-| View your profile | https://github.com/rishabsaini31-maker |
-| View commits | https://github.com/rishabsaini31-maker/Mayra-Impex-/commits/main |
+| Purpose              | URL                                                                |
+| -------------------- | ------------------------------------------------------------------ |
+| Check email settings | https://github.com/settings/emails                                 |
+| Check profile        | https://github.com/settings/profile                                |
+| View your profile    | https://github.com/rishabsaini31-maker                             |
+| View commits         | https://github.com/rishabsaini31-maker/Mayra-Impex-/commits/main   |
 | View specific commit | https://github.com/rishabsaini31-maker/Mayra-Impex-/commit/fd0572b |
 
 ---
@@ -218,10 +225,11 @@ The 5% is just GitHub's occasional delay. They should appear!
 **Go to check your settings now! 🚀**
 
 After all checks, reply with:
+
 - [ ] Email is Primary & Verified
 - [ ] Repository is PUBLIC
 - [ ] Account is PUBLIC
 - [ ] Green dots visible? YES/NO
-- [ ] Contribution count? ___
+- [ ] Contribution count? \_\_\_
 
 Then we'll know exactly what to do next!
