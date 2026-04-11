@@ -4,7 +4,8 @@ export const uploadAPI = {
   uploadImage: async (formData, folder = "products") => {
     formData.append("folder", folder);
 
-    const response = await api.post("/upload-image", formData, {
+    // Update endpoint to use /api/upload-image
+    const response = await api.post("/api/upload-image", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -14,7 +15,8 @@ export const uploadAPI = {
   },
 
   deleteImage: async (publicId) => {
-    const response = await api.delete("/delete-image", {
+    // Update endpoint to use /api/delete-image
+    const response = await api.delete("/api/delete-image", {
       data: {
         public_id: publicId,
       },
@@ -109,48 +111,42 @@ export const productAPI = {
 // Order APIs
 export const orderAPI = {
   placeOrder: async (data) => {
-    const response = await api.post("/orders", data);
+    const response = await api.post("/api/orders", data);
     return response.data;
   },
 
   getMyOrders: async (params = {}) => {
-    const response = await api.get("/orders/my-orders", { params });
-    return response.data;
-  },
-
-  getAllOrders: async (params = {}) => {
-    const response = await api.get("/orders/all", { params });
+    const response = await api.get("/api/orders/my-orders", { params });
     return response.data;
   },
 
   getById: async (id) => {
-    const response = await api.get(`/orders/${id}`);
+    const response = await api.get(`/api/orders/${id}`);
     return response.data;
   },
 
   updateStatus: async (id, status) => {
-    const response = await api.put(`/orders/${id}/status`, { status });
+    const response = await api.put(`/api/orders/${id}/status`, { status });
     return response.data;
   },
 
   getDashboardStats: async () => {
-    const response = await api.get("/orders/dashboard-stats");
+    const response = await api.get("/api/orders/dashboard-stats");
     return response.data;
   },
 
-  // New features
   getDetailedAnalytics: async () => {
-    const response = await api.get("/orders/analytics/detailed");
+    const response = await api.get("/api/orders/analytics/detailed");
     return response.data;
   },
 
   exportOrders: async (params = {}) => {
-    const response = await api.get("/orders/export/csv", { params });
+    const response = await api.get("/api/orders/export/csv", { params });
     return response.data;
   },
 
   bulkUpdateStatus: async (data) => {
-    const response = await api.patch("/orders/bulk/status", data);
+    const response = await api.patch("/api/orders/bulk/status", data);
     return response.data;
   },
 };
@@ -158,38 +154,40 @@ export const orderAPI = {
 // User/Customer APIs
 export const userAPI = {
   getAllCustomers: async (params = {}) => {
-    const response = await api.get("/auth/customers", { params });
+    const response = await api.get("/api/auth/customers", { params });
     return response.data;
   },
 
   getCustomerById: async (id) => {
-    const response = await api.get(`/auth/customers/${id}`);
+    const response = await api.get(`/api/auth/customers/${id}`);
     return response.data;
   },
 
   blockCustomer: async (id) => {
-    const response = await api.patch(`/auth/customers/${id}/block`);
+    const response = await api.patch(`/api/auth/customers/${id}/block`);
     return response.data;
   },
 
   unblockCustomer: async (id) => {
-    const response = await api.patch(`/auth/customers/${id}/unblock`);
+    const response = await api.patch(`/api/auth/customers/${id}/unblock`);
     return response.data;
   },
 
   // New features
   getCustomerSegments: async () => {
-    const response = await api.get("/auth/customers/segments/all");
+    const response = await api.get("/api/auth/customers/segments/all");
     return response.data;
   },
 
   exportCustomers: async (params = {}) => {
-    const response = await api.get("/auth/customers/export/csv", { params });
+    const response = await api.get("/api/auth/customers/export/csv", {
+      params,
+    });
     return response.data;
   },
 
   bulkUpdateCustomers: async (data) => {
-    const response = await api.patch("/auth/customers/bulk/update", data);
+    const response = await api.patch("/api/auth/customers/bulk/update", data);
     return response.data;
   },
 };
@@ -197,12 +195,12 @@ export const userAPI = {
 // Activity Log APIs
 export const activityAPI = {
   logActivity: async (data) => {
-    const response = await api.post("/activity", data);
+    const response = await api.post("/api/activity", data);
     return response.data;
   },
 
   getActivityLogs: async (params = {}) => {
-    const response = await api.get("/activity", { params });
+    const response = await api.get("/api/activity", { params });
     return response.data;
   },
 };
@@ -210,17 +208,17 @@ export const activityAPI = {
 // Customer Notes APIs
 export const notesAPI = {
   addNote: async (data) => {
-    const response = await api.post("/notes", data);
+    const response = await api.post("/api/notes", data);
     return response.data;
   },
 
   getNotes: async (customerId) => {
-    const response = await api.get(`/notes/${customerId}`);
+    const response = await api.get(`/api/notes/${customerId}`);
     return response.data;
   },
 
   deleteNote: async (noteId) => {
-    const response = await api.delete(`/notes/${noteId}`);
+    const response = await api.delete(`/api/notes/${noteId}`);
     return response.data;
   },
 };
@@ -228,27 +226,27 @@ export const notesAPI = {
 // Inventory APIs
 export const inventoryAPI = {
   updateQuantity: async (data) => {
-    const response = await api.post("/inventory/update", data);
+    const response = await api.post("/api/inventory/update", data);
     return response.data;
   },
 
   adjustInventory: async (data) => {
-    const response = await api.patch("/inventory/adjust", data);
+    const response = await api.patch("/api/inventory/adjust", data);
     return response.data;
   },
 
   bulkUpdateInventory: async (data) => {
-    const response = await api.patch("/inventory/bulk", data);
+    const response = await api.patch("/api/inventory/bulk", data);
     return response.data;
   },
 
   getAllInventory: async (params = {}) => {
-    const response = await api.get("/inventory", { params });
+    const response = await api.get("/api/inventory", { params });
     return response.data;
   },
 
   getInventory: async (productId) => {
-    const response = await api.get(`/inventory/${productId}`);
+    const response = await api.get(`/api/inventory/${productId}`);
     return response.data;
   },
 };

@@ -4,7 +4,7 @@
  * Uses: expo-image-manipulator + expo-file-system
  */
 
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import * as ImageManipulator from "expo-image-manipulator";
 
 const COMPRESSION_CONFIG = {

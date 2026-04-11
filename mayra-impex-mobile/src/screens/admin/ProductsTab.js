@@ -1,4 +1,36 @@
 import React, { useState, useEffect } from "react";
+// Product delete handler
+const handleDeleteProduct = (product) => {
+  Alert.alert(
+    "Delete Product",
+    `Are you sure you want to delete '${product.name}'? This action cannot be undone!`,
+    [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await productAPI.delete(product.id);
+            Alert.alert("Deleted", "Product deleted successfully.");
+            refetchProducts();
+            // If editing this product, close modal
+            if (editingProduct && editingProduct.id === product.id) {
+              handleCloseModal();
+            }
+          } catch (err) {
+            Alert.alert(
+              "Delete Failed",
+              err?.response?.data?.error ||
+                err.message ||
+                "Could not delete product.",
+            );
+          }
+        },
+      },
+    ],
+  );
+};
 import {
   View,
   Text,
@@ -428,89 +460,120 @@ const ProductsTab = ({ activeTab }) => {
             />
           }
           renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => handleEditProduct(item)}
-              style={[
-                styles.productCard,
-                { backgroundColor: currentTheme.cardBackground },
-              ]}
-            >
-              {item.image_url ? (
-                <Image
-                  source={{
-                    uri: (() => {
-                      try {
-                        const parsed = JSON.parse(item.image_url);
-                        return Array.isArray(parsed)
-                          ? parsed[0]
-                          : item.image_url;
-                      } catch {
-                        return item.image_url;
-                      }
-                    })(),
-                  }}
-                  style={styles.productImage}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View style={styles.productImagePlaceholder}>
-                  <Text style={styles.productImageText}>
-                    {item.name?.charAt(0)?.toUpperCase() || "P"}
-                  </Text>
-                </View>
-              )}
-              <View style={styles.productInfo}>
-                <Text
-                  style={[styles.productName, { color: currentTheme.text }]}
-                  numberOfLines={2}
-                >
-                  {item.name}
-                </Text>
-                <Text
-                  style={[
-                    styles.productCategory,
-                    { color: currentTheme.textLight },
-                  ]}
-                >
-                  {item.categories?.name || "Uncategorized"}
-                  {item.serial_number && (
-                    <Text
-                      style={[
-                        styles.productCategory,
-                        { color: currentTheme.textLight, fontSize: 12 },
-                      ]}
-                    >
-                      {" • SKU: " + item.serial_number}
-                    </Text>
-                  )}
-                </Text>
-                <View style={styles.productFooter}>
-                  <Text
-                    style={[
-                      styles.productPrice,
-                      { color: currentTheme.primary },
-                    ]}
-                  >
-                    ₹{item.price?.toLocaleString("en-IN") || "0"}
-                  </Text>
-                  <View
-                    style={[
-                      styles.activeIndicator,
-                      {
-                        backgroundColor: item.is_active ? "#10b981" : "#ef4444",
-                      },
-                    ]}
-                  >
-                    <Text style={styles.activeText}>
-                      {item.is_active ? "Active" : "Inactive"}
+            <View style={{ position: "relative" }}>
+              <TouchableOpacity
+                onPress={() => handleEditProduct(item)}
+                style={[
+                  styles.productCard,
+                  { backgroundColor: currentTheme.cardBackground },
+                ]}
+              >
+                {item.image_url ? (
+                  <Image
+                    source={{
+                      uri: (() => {
+                        try {
+                          const parsed = JSON.parse(item.image_url);
+                          return Array.isArray(parsed)
+                            ? parsed[0]
+                            : item.image_url;
+                        } catch {
+                          return item.image_url;
+                        }
+                      })(),
+                    }}
+                    style={styles.productImage}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={styles.productImagePlaceholder}>
+                    <Text style={styles.productImageText}>
+                      {item.name?.charAt(0)?.toUpperCase() || "P"}
                     </Text>
                   </View>
+                )}
+                <View style={styles.productInfo}>
+                  <Text
+                    style={[styles.productName, { color: currentTheme.text }]}
+                    numberOfLines={2}
+                  >
+                    {item.name}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.productCategory,
+                      { color: currentTheme.textLight },
+                    ]}
+                  >
+                    {item.categories?.name || "Uncategorized"}
+                    {item.serial_number && (
+                      <Text
+                        style={[
+                          styles.productCategory,
+                          { color: currentTheme.textLight, fontSize: 12 },
+                        ]}
+                      >
+                        {" • SKU: " + item.serial_number}
+                      </Text>
+                    )}
+                  </Text>
+                  <View style={styles.productFooter}>
+                    <Text
+                      style={[
+                        styles.productPrice,
+                        { color: currentTheme.primary },
+                      ]}
+                    >
+                      ₹{item.price?.toLocaleString("en-IN") || "0"}
+                    </Text>
+                    <View
+                      style={[
+                        styles.activeIndicator,
+                        {
+                          backgroundColor: item.is_active
+                            ? "#10b981"
+                            : "#ef4444",
+                        },
+                      ]}
+                    >
+                      <Text style={styles.activeText}>
+                        {item.is_active ? "Active" : "Inactive"}
+                      </Text>
+                    </View>
+                  </View>
                 </View>
-              </View>
-              <View style={styles.editIconContainer}>
-                <Ionicons name="create-outline" size={16} color={COLORS.text} />
-              </View>
-            </TouchableOpacity>
+                <View style={styles.editIconContainer}>
+                  <Ionicons
+                    name="create-outline"
+                    size={16}
+                    color={COLORS.text}
+                  />
+                </View>
+              </TouchableOpacity>
+              {/* Delete button (top right corner) */}
+              <TouchableOpacity
+                onPress={() => handleDeleteProduct(item)}
+                style={{
+                  position: "absolute",
+                  top: 8,
+                  right: 8,
+                  zIndex: 10,
+                  backgroundColor: "#ef4444",
+                  borderRadius: 16,
+                  width: 32,
+                  height: 32,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 2,
+                  elevation: 2,
+                }}
+              >
+                <Ionicons name="trash" size={18} color="#fff" />
+              </TouchableOpacity>
+            </View>
           )}
         />
       )}
