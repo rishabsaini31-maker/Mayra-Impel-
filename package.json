@@ -1,8 +1,12 @@
 {
   "dependencies": {
-    "expo": "^55.0.5",
-    "expo-updates": "^55.0.12",
+    "expo": "55.0.14",
+    "expo-file-system": "~55.0.16",
+    "expo-image-manipulator": "~55.0.15",
+    "expo-updates": "55.0.20",
     "nodemailer": "^8.0.1",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "react": "19.2.0",
+    "react-native": "0.83.4"
   }
 }
