@@ -1,7 +1,13 @@
 const { sendEmail } = require("./sendgrid.service");
 
 class EmailService {
-  async sendCSVExportEmail({ exportType, fileName, csvContent, requestedBy }) {
+  async sendCSVExportEmail({
+    exportType,
+    fileName,
+    csvContent,
+    requestedBy,
+    pdfBuffer,
+  }) {
     try {
       const destinationEmail =
         process.env.CSV_EXPORT_EMAIL ||
@@ -21,11 +27,11 @@ class EmailService {
             type: "text/csv",
             disposition: "attachment",
           },
-          ...(arguments[0].pdfBuffer
+          ...(pdfBuffer
             ? [
                 {
                   filename: fileName.replace(/\.csv$/, ".pdf"),
-                  content: arguments[0].pdfBuffer.toString("base64"),
+                  content: pdfBuffer.toString("base64"),
                   type: "application/pdf",
                   disposition: "attachment",
                 },

@@ -630,12 +630,10 @@ class OrderController {
       let x = doc.x,
         y = doc.y;
       headers.forEach((header, i) => {
-        doc
-          .font("Helvetica-Bold")
-          .text(header, x, y, {
-            width: colWidths[i],
-            continued: i < headers.length - 1,
-          });
+        doc.font("Helvetica-Bold").text(header, x, y, {
+          width: colWidths[i],
+          continued: i < headers.length - 1,
+        });
         x += colWidths[i];
       });
       doc.moveDown(0.5);
@@ -657,6 +655,12 @@ class OrderController {
       doc.end();
       const pdfBuffer = await pdfBufferPromise;
 
+      // Debug: log orders structure to diagnose missing products
+      console.log(
+        "[DEBUG] Orders data for export:",
+        JSON.stringify(orders, null, 2),
+      );
+
       let emailSent = false;
       let emailWarning = null;
 
@@ -666,6 +670,7 @@ class OrderController {
           fileName,
           csvContent: csv,
           requestedBy: { email: req.user?.email },
+          pdfBuffer,
         });
         emailSent = true;
       } catch (mailError) {
