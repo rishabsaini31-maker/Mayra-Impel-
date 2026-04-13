@@ -17,7 +17,7 @@ class EmailService {
         attachments: [
           {
             filename: fileName,
-            content: csvContent,
+            content: Buffer.from(csvContent).toString("base64"),
             type: "text/csv",
             disposition: "attachment",
           },
