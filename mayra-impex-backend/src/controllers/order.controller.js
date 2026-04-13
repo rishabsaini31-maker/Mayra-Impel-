@@ -566,7 +566,7 @@ class OrderController {
       let query = supabase
         .from("orders")
         .select(
-          "*, users:customer_id(name, email, phone), order_items(quantity, products(name, price))",
+          "*, users!fk_orders_customer(name, email, phone), order_items(quantity, products(name, price))",
         );
 
       if (startDate) query = query.gte("created_at", startDate);

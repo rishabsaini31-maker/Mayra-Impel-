@@ -34,10 +34,8 @@ router.patch(
   protectAgainstReplay,
   orderController.bulkUpdateStatus,
 );
-router.get(
-  "/all",
-  verifyAdmin,
-  (req, res) => orderController.getAllOrders(req, res),
+router.get("/all", verifyAdmin, (req, res) =>
+  orderController.getAllOrders(req, res),
 );
 router.put(
   "/:id/status",
