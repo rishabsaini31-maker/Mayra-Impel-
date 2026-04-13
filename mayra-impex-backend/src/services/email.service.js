@@ -13,7 +13,7 @@ class EmailService {
       await sendEmail({
         to: destinationEmail,
         subject,
-        text: `A ${exportType.toLowerCase()} CSV export was generated.${requestedBy?.email ? `\nRequested by: ${requestedBy.email}` : ""}`,
+        text: `A ${exportType.toLowerCase()} CSV and PDF export was generated.${requestedBy?.email ? `\nRequested by: ${requestedBy.email}` : ""}`,
         attachments: [
           {
             filename: fileName,
@@ -21,6 +21,16 @@ class EmailService {
             type: "text/csv",
             disposition: "attachment",
           },
+          ...(arguments[0].pdfBuffer
+            ? [
+                {
+                  filename: fileName.replace(/\.csv$/, ".pdf"),
+                  content: arguments[0].pdfBuffer.toString("base64"),
+                  type: "application/pdf",
+                  disposition: "attachment",
+                },
+              ]
+            : []),
         ],
       });
       console.log("✅ CSV email sent");

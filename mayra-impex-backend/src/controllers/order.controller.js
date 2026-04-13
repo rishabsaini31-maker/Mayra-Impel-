@@ -586,6 +586,7 @@ class OrderController {
         "Email",
         "Phone",
         "Total Items",
+        "Products",
         "Status",
       ];
       const rows = orders.map((order) => [
@@ -595,11 +596,66 @@ class OrderController {
         order.users?.email || "N/A",
         order.users?.phone || "N/A",
         order.order_items?.length || 0,
+        (order.order_items || [])
+          .map(
+            (item) =>
+              `${item.products?.name || "N/A"} (${item.quantity} x $${item.products?.price ?? "N/A"})`,
+          )
+          .join("; "),
         order.status,
       ]);
 
       const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
       const fileName = `orders_export_${Date.now()}.csv`;
+
+      // Generate PDF with all orders in a table
+      const PDFDocument = require("pdfkit");
+      const getBufferFromStream = (stream) => {
+        return new Promise((resolve, reject) => {
+          const chunks = [];
+          stream.on("data", (chunk) => chunks.push(chunk));
+          stream.on("end", () => resolve(Buffer.concat(chunks)));
+          stream.on("error", reject);
+        });
+      };
+      const doc = new PDFDocument({ margin: 30, size: "A4" });
+      let pdfBufferPromise = getBufferFromStream(doc);
+
+      doc.fontSize(18).text("Mayra Impex - Orders Export", { align: "center" });
+      doc.moveDown(1);
+      doc.fontSize(12);
+
+      // Table header
+      const colWidths = [60, 60, 80, 100, 70, 50, 120, 60];
+      let x = doc.x,
+        y = doc.y;
+      headers.forEach((header, i) => {
+        doc
+          .font("Helvetica-Bold")
+          .text(header, x, y, {
+            width: colWidths[i],
+            continued: i < headers.length - 1,
+          });
+        x += colWidths[i];
+      });
+      doc.moveDown(0.5);
+      doc.font("Helvetica");
+
+      // Table rows
+      rows.forEach((row) => {
+        x = doc.x;
+        row.forEach((cell, i) => {
+          doc.text(String(cell), x, doc.y, {
+            width: colWidths[i],
+            continued: i < row.length - 1,
+          });
+          x += colWidths[i];
+        });
+        doc.moveDown(0.5);
+      });
+
+      doc.end();
+      const pdfBuffer = await pdfBufferPromise;
 
       let emailSent = false;
       let emailWarning = null;
