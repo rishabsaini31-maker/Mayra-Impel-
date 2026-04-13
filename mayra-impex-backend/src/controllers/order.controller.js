@@ -287,31 +287,49 @@ class OrderController {
   // Get all orders (Admin only)
   async getAllOrders(req, res) {
     try {
-      const { page = 1, limit = 20, status } = req.query;
+      const { page = 1, limit = 20, status, search } = req.query;
       const offset = (page - 1) * limit;
 
-      let query = supabase.from("orders").select(
-        `
+      // Always join customer details
+      let selectString = `
+        id,
+        status,
+        created_at,
+        customer_id,
+        delivery_name,
+        delivery_phone,
+        shop_name,
+        delivery_address,
+        users:customer_id(id, name, phone, email),
+        order_items (
           id,
-          status,
-          created_at,
-          customer_id,
-          order_items (
+          quantity,
+          products (
             id,
-            quantity,
-            products (
-              id,
-              name,
-              price,
-              serial_number
-            )
+            name,
+            price,
+            serial_number
           )
-        `,
-        { count: "exact" },
-      );
+        )
+      `;
+
+      let query = supabase
+        .from("orders")
+        .select(selectString, { count: "exact" });
 
       if (status) {
         query = query.eq("status", status);
+      }
+
+      // Search by order ID or customer name
+      if (search) {
+        if (/^\d+$/.test(search)) {
+          // Numeric: search by order ID
+          query = query.eq("id", search);
+        } else {
+          // Text: search by customer name (case-insensitive, partial)
+          query = query.ilike("users.name", `%${search}%`);
+        }
       }
 
       query = query
@@ -321,33 +339,38 @@ class OrderController {
       let { data: orders, error, count } = await query;
 
       if (error && this.constructor.isMissingSerialNumberColumn(error)) {
-        let fallbackQuery = supabase.from("orders").select(
-          `
+        let fallbackSelect = `
+          id,
+          status,
+          created_at,
+          customer_id,
+          users:customer_id(id, name, phone, email),
+          order_items (
+            id,
+            quantity,
+            products (
               id,
-              status,
-              created_at,
-              customer_id,
-              order_items (
-                id,
-                quantity,
-                products (
-                  id,
-                  name,
-                  price
-                )
-              )
-            `,
-          { count: "exact" },
-        );
-
+              name,
+              price
+            )
+          )
+        `;
+        let fallbackQuery = supabase
+          .from("orders")
+          .select(fallbackSelect, { count: "exact" });
         if (status) {
           fallbackQuery = fallbackQuery.eq("status", status);
         }
-
+        if (search) {
+          if (/^\d+$/.test(search)) {
+            fallbackQuery = fallbackQuery.eq("id", search);
+          } else {
+            fallbackQuery = fallbackQuery.ilike("users.name", `%${search}%`);
+          }
+        }
         fallbackQuery = fallbackQuery
           .order("created_at", { ascending: false })
           .range(offset, offset + limit - 1);
-
         const fallbackResult = await fallbackQuery;
         orders = fallbackResult.data;
         error = fallbackResult.error;
@@ -355,6 +378,12 @@ class OrderController {
       }
 
       if (error) throw error;
+
+      // Ensure customer details are always present in the response
+      orders = (orders || []).map((order) => ({
+        ...order,
+        customer: order.users || { name: "Unknown", phone: "-", email: "-" },
+      }));
 
       res.status(200).json({
         orders,
@@ -424,39 +453,47 @@ class OrderController {
 
       let { data: order, error } = await query.single();
 
-      if (error && OrderController.isMissingSerialNumberColumn(error)) {
+      if (error && this.constructor.isMissingSerialNumberColumn(error)) {
+        let fallbackSelect = `
+          id,
+          status,
+          created_at,
+          customer_id,
+          delivery_name,
+          delivery_phone,
+          shop_name,
+          delivery_address,
+          users:customer_id(id, name, phone, email),
+          order_items (
+            id,
+            quantity,
+            products (
+              id,
+              name,
+              price
+            )
+          )
+        `;
         let fallbackQuery = supabase
           .from("orders")
-          .select(
-            `
-            id,
-            status,
-            created_at,
-            order_items (
-              id,
-              quantity,
-              products (
-                id,
-                name,
-                price,
-                image_url
-              )
-            )
-          `,
-          )
-          .eq("id", id);
-
-        if (userRole === "customer") {
-          fallbackQuery = fallbackQuery.eq("customer_id", userId);
+          .select(fallbackSelect, { count: "exact" });
+        if (status) {
+          fallbackQuery = fallbackQuery.eq("status", status);
         }
-
-        const fallbackResult = await fallbackQuery.single();
-        order = fallbackResult.data;
+        if (search) {
+          if (/^\d+$/.test(search)) {
+            fallbackQuery = fallbackQuery.eq("id", search);
+          } else {
+            fallbackQuery = fallbackQuery.ilike("users.name", `%${search}%`);
+          }
+        }
+        fallbackQuery = fallbackQuery
+          .order("created_at", { ascending: false })
+          .range(offset, offset + limit - 1);
+        const fallbackResult = await fallbackQuery;
+        orders = fallbackResult.data;
         error = fallbackResult.error;
-      }
-
-      if (error || !order) {
-        return res.status(404).json({ error: "Order not found" });
+        count = fallbackResult.count;
       }
 
       res.status(200).json({ order });
