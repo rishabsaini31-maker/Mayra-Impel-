@@ -439,6 +439,15 @@ export default function Products() {
                   background: "#f3f4f6",
                 }}
               >
+                Image
+              </th>
+              <th
+                style={{
+                  border: "1px solid #e5e7eb",
+                  padding: 12,
+                  background: "#f3f4f6",
+                }}
+              >
                 Name
               </th>
               <th
@@ -493,6 +502,17 @@ export default function Products() {
                 >
                   <td style={{ border: "1px solid #e5e7eb", padding: 10 }}>
                     {product.id}
+                  </td>
+                  <td style={{ border: "1px solid #e5e7eb", padding: 10 }}>
+                    {product.image_url ? (
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 6 }}
+                      />
+                    ) : (
+                      <span style={{ color: "#bbb" }}>No Image</span>
+                    )}
                   </td>
                   <td style={{ border: "1px solid #e5e7eb", padding: 10 }}>
                     {product.name}

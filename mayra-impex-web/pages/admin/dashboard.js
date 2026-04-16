@@ -43,15 +43,18 @@ export default function Dashboard() {
 
   useEffect(() => {
     setLoading(true);
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
     api
-      .get("/orders/dashboard-stats")
+      .get("/orders/dashboard-stats", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
       .then((res) => {
         const apiStats = res.data.stats || {};
         setStats((prev) =>
           prev.map((stat) => ({
             ...stat,
             value: apiStats[stat.key] ?? 0,
-          })),
+          }))
         );
         setLoading(false);
       })
