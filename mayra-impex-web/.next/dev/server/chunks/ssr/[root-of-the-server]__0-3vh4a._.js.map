@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///Users/rishab/Desktop/Mayra%20Impex/mayra-impex-web/pages/index.js"],"sourcesContent":["export default function Home() {\n  return (\n    <div\n      style={{\n        display: \"flex\",\n        justifyContent: \"center\",\n        alignItems: \"center\",\n        height: \"100vh\",\n      }}\n    >\n      <h1>Mayra Impex Admin Dashboard</h1>\n    </div>\n  );\n}\n"],"names":["Home","style","display","justifyContent","alignItems","height"],"mappings":";;;;;;AAAe,SAASA;IACtB,qBACE,qKAAC;QACCC,OAAO;YACLC,SAAS;YACTC,gBAAgB;YAChBC,YAAY;YACZC,QAAQ;QACV;kBAEA,cAAA,qKAAC;sBAAG;;;;;;;;;;;AAGV"}}]
+}

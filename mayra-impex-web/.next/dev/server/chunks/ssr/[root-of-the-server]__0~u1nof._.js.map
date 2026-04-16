@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///Users/rishab/Desktop/Mayra%20Impex/mayra-impex-web/pages/admin/banners.js"],"sourcesContent":["import React from \"react\";\n\nexport default function Banners() {\n  return (\n    <div>\n      <h2\n        style={{\n          textAlign: \"center\",\n          fontWeight: 800,\n          fontSize: 28,\n          marginBottom: 24,\n        }}\n      >\n        Banners (Slider Images)\n      </h2>\n      {/* Banner management UI will go here */}\n    </div>\n  );\n}\n"],"names":["Banners","style","textAlign","fontWeight","fontSize","marginBottom"],"mappings":";;;;;AAAA;;;AAEe,SAASA;IACtB,qBACE,qKAAC;kBACC,cAAA,qKAAC;YACCC,OAAO;gBACLC,WAAW;gBACXC,YAAY;gBACZC,UAAU;gBACVC,cAAc;YAChB;sBACD;;;;;;;;;;;AAMP"}}]
+}

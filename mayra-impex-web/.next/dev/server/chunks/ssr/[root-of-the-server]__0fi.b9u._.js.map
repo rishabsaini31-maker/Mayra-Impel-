@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 52, "column": 0}, "map": {"version":3,"sources":["file:///Users/rishab/Desktop/Mayra%20Impex/mayra-impex-web/pages/_app.js"],"sourcesContent":["\nimport { useRouter } from 'next/router';\n\nexport default function MyApp({ Component, pageProps }) {\n  const router = useRouter();\n  const isAdminRoute = router.pathname.startsWith('/admin');\n  return (\n    <div style={{display:'flex'}}>\n      {isAdminRoute && <AdminSidebar />}\n      <div style={{marginLeft: isAdminRoute ? 220 : 0, flex:1, minHeight:'100vh'}}>\n        <Component {...pageProps} />\n      </div>\n    </div>\n  );\n}\n"],"names":["MyApp","Component","pageProps","router","isAdminRoute","pathname","startsWith","style","display","AdminSidebar","marginLeft","flex","minHeight"],"mappings":";;;;;AACA;;;AAEe,SAASA,MAAM,EAAEC,SAAS,EAAEC,SAAS,EAAE;IACpD,MAAMC,SAAS,IAAA,6JAAS;IACxB,MAAMC,eAAeD,OAAOE,QAAQ,CAACC,UAAU,CAAC;IAChD,qBACE,qKAAC;QAAIC,OAAO;YAACC,SAAQ;QAAM;;YACxBJ,8BAAgB,qKAACK;;;;;0BAClB,qKAAC;gBAAIF,OAAO;oBAACG,YAAYN,eAAe,MAAM;oBAAGO,MAAK;oBAAGC,WAAU;gBAAO;0BACxE,cAAA,qKAACX;oBAAW,GAAGC,SAAS;;;;;;;;;;;;;;;;;AAIhC"}}]
+}

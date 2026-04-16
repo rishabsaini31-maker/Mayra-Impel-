@@ -1,0 +1,13 @@
+{
+  "/": "pages/index.js",
+  "/_app": "pages/_app.js",
+  "/_document": "pages/_document.js",
+  "/_error": "pages/_error.js",
+  "/admin/activity": "pages/admin/activity.js",
+  "/admin/banners": "pages/admin/banners.js",
+  "/admin/categories": "pages/admin/categories.js",
+  "/admin/customers": "pages/admin/customers.js",
+  "/admin/dashboard": "pages/admin/dashboard.js",
+  "/admin/orders": "pages/admin/orders.js",
+  "/admin/products": "pages/admin/products.js"
+}

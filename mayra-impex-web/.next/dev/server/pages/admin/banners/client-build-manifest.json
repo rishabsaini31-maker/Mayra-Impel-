@@ -1,0 +1,5 @@
+{
+  "/admin/banners": [
+    "static/chunks/pages/admin/banners.js"
+  ]
+}

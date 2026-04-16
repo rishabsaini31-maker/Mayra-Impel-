@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///Users/rishab/Desktop/Mayra%20Impex/mayra-impex-web/pages/admin/customers.js"],"sourcesContent":["import React from 'react';\n\nexport default function Customers() {\n  return (\n    <div>\n      <h2 style={{textAlign:'center',fontWeight:800,fontSize:28,marginBottom:24}}>Customers Management</h2>\n      {/* Customers table and actions will go here */}\n    </div>\n  );\n}\n"],"names":["Customers","style","textAlign","fontWeight","fontSize","marginBottom"],"mappings":";;;;;AAAA;;;AAEe,SAASA;IACtB,qBACE,qKAAC;kBACC,cAAA,qKAAC;YAAGC,OAAO;gBAACC,WAAU;gBAASC,YAAW;gBAAIC,UAAS;gBAAGC,cAAa;YAAE;sBAAG;;;;;;;;;;;AAIlF"}}]
+}
