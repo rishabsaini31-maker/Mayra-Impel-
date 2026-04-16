@@ -1,34 +1,34 @@
-// Edit and Delete handlers
-const handleEditProduct = (product) => {
-  setShowAddModal(true);
-  setAddForm({
-    name: product.name,
-    category: product.categoryName || product.category?.name || "",
-    price: product.price,
-    sku: product.sku,
-    description: product.description,
-    image: null,
-    id: product.id,
-  });
-};
-
-const handleDeleteProduct = async (id) => {
-  if (!window.confirm("Are you sure you want to delete this product?")) return;
-  setLoading(true);
-  try {
-    await api.delete(`/products/${id}`);
-    setProducts(products.filter((p) => p.id !== id));
-    setLoading(false);
-  } catch {
-    setError("Failed to delete product");
-    setLoading(false);
-  }
-};
-
 import api from "../../lib/api";
 import React, { useEffect, useState, useRef } from "react";
 
 export default function Products() {
+  // ...existing code...
+    // Edit and Delete handlers (must be inside component)
+    const handleEditProduct = (product) => {
+      setShowAddModal(true);
+      setAddForm({
+        name: product.name,
+        category: product.categoryName || product.category?.name || "",
+        price: product.price,
+        sku: product.sku,
+        description: product.description,
+        image: null,
+        id: product.id,
+      });
+    };
+
+    const handleDeleteProduct = async (id) => {
+      if (!window.confirm("Are you sure you want to delete this product?")) return;
+      setLoading(true);
+      try {
+        await api.delete(`/products/${id}`);
+        setProducts(products.filter((p) => p.id !== id));
+        setLoading(false);
+      } catch {
+        setError("Failed to delete product");
+        setLoading(false);
+      }
+    };
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -508,7 +508,12 @@ export default function Products() {
                       <img
                         src={product.image_url}
                         alt={product.name}
-                        style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 6 }}
+                        style={{
+                          width: 48,
+                          height: 48,
+                          objectFit: "cover",
+                          borderRadius: 6,
+                        }}
                       />
                     ) : (
                       <span style={{ color: "#bbb" }}>No Image</span>
