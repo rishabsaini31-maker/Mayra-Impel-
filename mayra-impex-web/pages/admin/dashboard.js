@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import api from "../../lib/api";
 
-const stats = [
+const defaultStats = [
   {
     title: "Total Products",
+    key: "totalProducts",
     value: 0,
     bgColor: "#EFF6FF",
     color: "#3B82F6",
@@ -10,6 +12,7 @@ const stats = [
   },
   {
     title: "Total Orders",
+    key: "totalOrders",
     value: 0,
     bgColor: "#F0FDF4",
     color: "#10B981",
@@ -17,6 +20,7 @@ const stats = [
   },
   {
     title: "Pending Orders",
+    key: "pendingOrders",
     value: 0,
     bgColor: "#FFFBEB",
     color: "#F59E0B",
@@ -24,6 +28,7 @@ const stats = [
   },
   {
     title: "Total Customers",
+    key: "totalCustomers",
     value: 0,
     bgColor: "#F3E8FF",
     color: "#8B5CF6",
@@ -32,6 +37,30 @@ const stats = [
 ];
 
 export default function Dashboard() {
+  const [stats, setStats] = useState(defaultStats);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setLoading(true);
+    api
+      .get("/orders/dashboard-stats")
+      .then((res) => {
+        const apiStats = res.data.stats || {};
+        setStats((prev) =>
+          prev.map((stat) => ({
+            ...stat,
+            value: apiStats[stat.key] ?? 0,
+          })),
+        );
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Failed to load dashboard stats");
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <div
       style={{ padding: "32px 24px", background: "#fff", minHeight: "100vh" }}
@@ -57,6 +86,12 @@ export default function Dashboard() {
       >
         Key metrics and statistics
       </div>
+      {loading && (
+        <div style={{ textAlign: "center", color: "#888" }}>Loading...</div>
+      )}
+      {error && (
+        <div style={{ textAlign: "center", color: "red" }}>{error}</div>
+      )}
       <div
         style={{
           display: "grid",

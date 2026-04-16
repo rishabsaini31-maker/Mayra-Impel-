@@ -26,13 +26,11 @@ export default function Login() {
         setError("Invalid credentials");
       }
     } catch (err) {
-      setError(
-        err?.response?.data?.error || "Invalid credentials"
-      );
+      setError(err?.response?.data?.error || "Invalid credentials");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <div
@@ -57,14 +55,21 @@ export default function Login() {
           gap: 18,
         }}
       >
-        <h2 style={{ textAlign: "center", fontWeight: 800, fontSize: 28, marginBottom: 8 }}>
+        <h2
+          style={{
+            textAlign: "center",
+            fontWeight: 800,
+            fontSize: 28,
+            marginBottom: 8,
+          }}
+        >
           Admin Login
         </h2>
         <input
           type="email"
           placeholder="Email"
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
           required
           style={{ padding: 10, borderRadius: 6, border: "1px solid #e5e7eb" }}
         />
@@ -73,9 +78,14 @@ export default function Login() {
             type={showPassword ? "text" : "password"}
             placeholder="Password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             required
-            style={{ padding: 10, borderRadius: 6, border: "1px solid #e5e7eb", width: "100%" }}
+            style={{
+              padding: 10,
+              borderRadius: 6,
+              border: "1px solid #e5e7eb",
+              width: "100%",
+            }}
           />
           <button
             type="button"
@@ -98,11 +108,22 @@ export default function Login() {
             {showPassword ? "Hide" : "Show"}
           </button>
         </div>
-        {error && <div style={{ color: "red", textAlign: "center" }}>{error}</div>}
+        {error && (
+          <div style={{ color: "red", textAlign: "center" }}>{error}</div>
+        )}
         <button
           type="submit"
           disabled={loading}
-          style={{ padding: 12, borderRadius: 6, background: "#2563eb", color: "#fff", border: "none", fontWeight: 700, fontSize: 16, cursor: loading ? "not-allowed" : "pointer" }}
+          style={{
+            padding: 12,
+            borderRadius: 6,
+            background: "#2563eb",
+            color: "#fff",
+            border: "none",
+            fontWeight: 700,
+            fontSize: 16,
+            cursor: loading ? "not-allowed" : "pointer",
+          }}
         >
           {loading ? "Logging in..." : "Login"}
         </button>
